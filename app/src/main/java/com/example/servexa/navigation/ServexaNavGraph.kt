@@ -1,13 +1,14 @@
-
 package com.example.servexa.navigation
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -76,13 +77,13 @@ fun ServexaNavGraph(
             ProviderRepository()
         )
     )
+
     // JOB VIEWMODEL
     val jobViewModel: JobViewModel = viewModel(
         factory = JobViewModelFactory(
             JobRepository()
         )
     )
-
 
     var startDestination by remember {
         mutableStateOf<String?>(null)
@@ -103,6 +104,31 @@ fun ServexaNavGraph(
         }
     }
 
+    // Helper for main tab navigation to avoid duplicate screens and huge backstack build-up
+    fun navigateToTab(route: String) {
+        if (navController.currentDestination?.route == route) return
+        navController.navigate(route) {
+            val startId = navController.graph.startDestinationId
+            if (startId != 0) {
+                popUpTo(startId) {
+                    saveState = true
+                }
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
+    // Helper to navigate after auth or setup, clearing auth screens from backstack
+    fun navigateMain(destination: String) {
+        navController.navigate(destination) {
+            popUpTo(0) {
+                inclusive = true
+            }
+            launchSingleTop = true
+        }
+    }
+
     if (startDestination != null) {
         NavHost(
             navController = navController,
@@ -116,13 +142,19 @@ fun ServexaNavGraph(
                 LoginScreen(
                     viewModel = authViewModel,
                     onLoginSuccess = {
-                        navController.navigate(
-                            Screen.Dashboard.route
-                        ) {
-                            popUpTo(Screen.Login.route) {
-                                inclusive = true
+                        val currentUser = userViewModel.user.value
+                        val destination = when (currentUser?.currentRole) {
+                            "CUSTOMER" -> Screen.CustomerDashBoardScreen.route
+                            "SERVICE_PROVIDER" -> {
+                                if (currentUser.services.isEmpty()) {
+                                    Screen.Services.route
+                                } else {
+                                    Screen.Dashboard.route
+                                }
                             }
+                            else -> Screen.Dashboard.route
                         }
+                        navigateMain(destination)
                     },
                     onSignUpClick = {
                         navController.navigate(
@@ -142,15 +174,12 @@ fun ServexaNavGraph(
                         navController.popBackStack()
                     },
                     onRegisterSuccess = { role ->
-                        if (role == "SERVICE_PROVIDER") {
-                            navController.navigate(
-                                Screen.Services.route
-                            )
+                        val destination = if (role == "SERVICE_PROVIDER") {
+                            Screen.Services.route
                         } else {
-                            navController.navigate(
-                                Screen.CustomerDashBoardScreen.route
-                            )
+                            Screen.CustomerDashBoardScreen.route
                         }
+                        navigateMain(destination)
                     }
                 )
             }
@@ -163,24 +192,16 @@ fun ServexaNavGraph(
                     viewModel = userViewModel,
                     jobViewModel = jobViewModel,
                     onHomeClick = {
-                        navController.navigate(
-                            Screen.Dashboard.route
-                        )
+                        navigateToTab(Screen.Dashboard.route)
                     },
                     onJobsClick = {
-                        navController.navigate(
-                            Screen.Jobs.route
-                        )
+                        navigateToTab(Screen.Jobs.route)
                     },
                     onProfileClick = {
-                        navController.navigate(
-                            Screen.Profile.route
-                        )
+                        navigateToTab(Screen.Profile.route)
                     },
                     onMessageClick = {
-                        navController.navigate(
-                            Screen.Conversations.route
-                        )
+                        navigateToTab(Screen.Conversations.route)
                     }
                 )
             }
@@ -189,28 +210,16 @@ fun ServexaNavGraph(
             composable(
                 route = Screen.Jobs.route
             ) {
-                val jobViewModel: JobViewModel = viewModel(
-                    factory = JobViewModelFactory(
-                        JobRepository()
-                    )
-                )
-
                 JobsScreen(
                     viewModel = jobViewModel,
                     onHomeClick = {
-                        navController.navigate(
-                            Screen.Dashboard.route
-                        )
+                        navigateToTab(Screen.Dashboard.route)
                     },
                     onProfileClick = {
-                        navController.navigate(
-                            Screen.Profile.route
-                        )
+                        navigateToTab(Screen.Profile.route)
                     },
                     onJobClick = {
-                        navController.navigate(
-                            Screen.Jobs.route
-                        )
+                        // Job detail click if applicable
                     },
                     onChatClick = { job ->
                         if (
@@ -239,12 +248,6 @@ fun ServexaNavGraph(
             composable(
                 route = Screen.CustomerDashBoardScreen.route
             ) {
-                val jobViewModel: JobViewModel = viewModel(
-                    factory = JobViewModelFactory(
-                        JobRepository()
-                    )
-                )
-
                 CustomerDashboardScreen(
                     jobViewModel = jobViewModel,
                     onServiceClick = { service ->
@@ -253,16 +256,14 @@ fun ServexaNavGraph(
                         )
                     },
                     onInboxClick = {
-                        navController.navigate(Screen.Conversations.route)
+                        navigateToTab(Screen.Conversations.route)
                     },
                     userName = userViewModel.user.value?.name ?: "there",
                     onRequestsClick = {
-                        navController.navigate(
-                            Screen.CustomerRequests.route
-                        )
+                        navigateToTab(Screen.CustomerRequests.route)
                     },
                     onProfileClick = {
-                        navController.navigate(Screen.Profile.route)
+                        navigateToTab(Screen.Profile.route)
                     }
                 )
             }
@@ -271,12 +272,6 @@ fun ServexaNavGraph(
             composable(
                 route = Screen.CustomerRequests.route
             ) {
-                val jobViewModel: JobViewModel = viewModel(
-                    factory = JobViewModelFactory(
-                        JobRepository()
-                    )
-                )
-
                 CustomerRequestsScreen(
                     viewModel = jobViewModel,
 
@@ -284,15 +279,10 @@ fun ServexaNavGraph(
                         navController.popBackStack()
                     },
 
-                    // Inbox icon opens the conversations list.
                     onInboxClick = {
-                        navController.navigate(
-                            Screen.Conversations.route
-                        )
+                        navigateToTab(Screen.Conversations.route)
                     },
 
-                    // Chat button opens or creates a conversation
-                    // for this specific job and its assigned provider.
                     onChatClick = { job ->
                         if (
                             job.customerApprovedProvider &&
@@ -324,19 +314,18 @@ fun ServexaNavGraph(
                 ProfileScreen(
                     viewModel = userViewModel,
                     onProfileClick = {
-                        navController.navigate(
-                            Screen.Profile.route
-                        )
+                        navigateToTab(Screen.Profile.route)
                     },
                     onJobsClick = {
-                        navController.navigate(
-                            Screen.Jobs.route
-                        )
+                        navigateToTab(Screen.Jobs.route)
                     },
                     onHomeClick = {
-                        navController.navigate(
-                            Screen.Dashboard.route
-                        )
+                        val currentRole = userViewModel.user.value?.currentRole
+                        if (currentRole == "CUSTOMER") {
+                            navigateToTab(Screen.CustomerDashBoardScreen.route)
+                        } else {
+                            navigateToTab(Screen.Dashboard.route)
+                        }
                     },
                     onSwitchAccountClick = { role ->
                         val destination = when (role) {
@@ -353,12 +342,7 @@ fun ServexaNavGraph(
                             else -> Screen.Login.route
                         }
 
-                        navController.navigate(destination) {
-                            popUpTo(Screen.Profile.route) {
-                                inclusive = true
-                            }
-                            launchSingleTop = true
-                        }
+                        navigateMain(destination)
                     }
                 )
             }
@@ -379,9 +363,7 @@ fun ServexaNavGraph(
                             services
                         )
 
-                        navController.navigate(
-                            Screen.Dashboard.route
-                        )
+                        navigateMain(Screen.Dashboard.route)
                     }
                 )
             }
@@ -396,14 +378,10 @@ fun ServexaNavGraph(
                 )
             ) { backStackEntry ->
 
+                val context = LocalContext.current
+
                 val service =
                     backStackEntry.arguments?.getString("service") ?: ""
-
-                val jobViewModel: JobViewModel = viewModel(
-                    factory = JobViewModelFactory(
-                        JobRepository()
-                    )
-                )
 
                 PostJobScreen(
                     initialService = service,
@@ -432,7 +410,15 @@ fun ServexaNavGraph(
                                 price = budget
                             )
 
-                            jobViewModel.addJob(job)
+                            jobViewModel.addJob(job) {
+                                Toast.makeText(
+                                    context,
+                                    "Job posted successfully!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                                navController.popBackStack()
+                            }
                         }
                     }
                 )

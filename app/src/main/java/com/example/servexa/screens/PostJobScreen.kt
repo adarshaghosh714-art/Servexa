@@ -1,5 +1,6 @@
 package com.example.servexa.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +33,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -164,7 +167,7 @@ fun PostJobScreen(
                 )
             )
         },
-        containerColor = ServexaBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
 
         Column(
@@ -179,7 +182,7 @@ fun PostJobScreen(
                 text = "What do you need help with?",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = ServexaText
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(
@@ -189,7 +192,7 @@ fun PostJobScreen(
             Text(
                 text = "Choose a service and tell us what you need.",
                 fontSize = 14.sp,
-                color = ServexaGray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(
@@ -296,7 +299,7 @@ fun PostJobScreen(
                 text = "Describe your problem",
                 fontSize = 17.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = ServexaText
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(
@@ -313,11 +316,20 @@ fun PostJobScreen(
                     .height(140.dp),
                 placeholder = {
                     Text(
-                        text = "Example: My bedroom fan is not working..."
+                        text = "Example: My bedroom fan is not working...",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
                 shape = RoundedCornerShape(16.dp),
-                maxLines = 6
+                maxLines = 6,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+                )
             )
 
             Spacer(
@@ -330,7 +342,7 @@ fun PostJobScreen(
                 text = "Your Budget",
                 fontSize = 17.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = ServexaText
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(
@@ -351,17 +363,27 @@ fun PostJobScreen(
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
                     Text(
-                        text = "Enter your maximum budget"
+                        text = "Enter your maximum budget",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
                 prefix = {
                     Text(
                         text = "₹ ",
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 },
                 shape = RoundedCornerShape(16.dp),
-                singleLine = true
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+                )
             )
 
             Spacer(
@@ -374,7 +396,7 @@ fun PostJobScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(18.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             ) {
 
@@ -392,7 +414,7 @@ fun PostJobScreen(
                             modifier = Modifier
                                 .size(46.dp)
                                 .background(
-                                    color = ServexaLightPurple,
+                                    color = MaterialTheme.colorScheme.surfaceVariant,
                                     shape = RoundedCornerShape(14.dp)
                                 ),
                             contentAlignment = Alignment.Center
@@ -401,7 +423,7 @@ fun PostJobScreen(
                             Icon(
                                 imageVector = Icons.Default.Person,
                                 contentDescription = null,
-                                tint = ServexaPurple
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
 
@@ -415,7 +437,7 @@ fun PostJobScreen(
                                 text = "Select a Provider",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = ServexaText
+                                color = MaterialTheme.colorScheme.onSurface
                             )
 
                             Text(
@@ -425,7 +447,7 @@ fun PostJobScreen(
                                     "${providers.size} provider(s) found"
                                 },
                                 fontSize = 13.sp,
-                                color = ServexaGray
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -439,7 +461,7 @@ fun PostJobScreen(
                         Text(
                             text = "Choose a service to find providers.",
                             fontSize = 14.sp,
-                            color = ServexaGray
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
                     } else if (providers.isEmpty()) {
@@ -447,7 +469,7 @@ fun PostJobScreen(
                         Text(
                             text = "No providers found for $selectedService.",
                             fontSize = 14.sp,
-                            color = ServexaGray
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
                     } else {
@@ -463,19 +485,22 @@ fun PostJobScreen(
                                 colors = CardDefaults.cardColors(
                                     containerColor =
                                         if (selectedProvider == provider.uid) {
-                                            ServexaLightPurple
+                                            MaterialTheme.colorScheme.surfaceVariant
                                         } else {
-                                            Color.White
+                                            MaterialTheme.colorScheme.surface
                                         }
                                 ),
                                 border =
                                     if (selectedProvider == provider.uid) {
                                         androidx.compose.foundation.BorderStroke(
                                             2.dp,
-                                            ServexaPurple
+                                            MaterialTheme.colorScheme.primary
                                         )
                                     } else {
-                                        null
+                                        BorderStroke(
+                                            1.dp,
+                                            MaterialTheme.colorScheme.outlineVariant
+                                        )
                                     }
                             ) {
 
@@ -490,7 +515,11 @@ fun PostJobScreen(
                                         modifier = Modifier
                                             .size(40.dp)
                                             .background(
-                                                color = ServexaLightPurple,
+                                                color = if (selectedProvider == provider.uid) {
+                                                    MaterialTheme.colorScheme.primary
+                                                } else {
+                                                    MaterialTheme.colorScheme.surfaceVariant
+                                                },
                                                 shape = RoundedCornerShape(12.dp)
                                             ),
                                         contentAlignment = Alignment.Center
@@ -499,7 +528,11 @@ fun PostJobScreen(
                                         Icon(
                                             imageVector = Icons.Default.Person,
                                             contentDescription = null,
-                                            tint = ServexaPurple
+                                            tint = if (selectedProvider == provider.uid) {
+                                                Color.White
+                                            } else {
+                                                MaterialTheme.colorScheme.primary
+                                            }
                                         )
                                     }
 
@@ -515,7 +548,7 @@ fun PostJobScreen(
                                             text = provider.name,
                                             fontSize = 15.sp,
                                             fontWeight = FontWeight.SemiBold,
-                                            color = ServexaText
+                                            color = MaterialTheme.colorScheme.onSurface
                                         )
 
                                         Spacer(
@@ -525,7 +558,7 @@ fun PostJobScreen(
                                         Text(
                                             text = provider.email,
                                             fontSize = 12.sp,
-                                            color = ServexaGray
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
 
@@ -538,7 +571,7 @@ fun PostJobScreen(
                                             },
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.SemiBold,
-                                        color = ServexaPurple
+                                        color = MaterialTheme.colorScheme.primary
                                     )
                                 }
                             }
@@ -591,8 +624,10 @@ fun PostJobScreen(
                         selectedProvider != null,
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = ServexaPurple,
-                    disabledContainerColor = Color.LightGray
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = Color.White,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
                 )
             ) {
 
@@ -611,7 +646,7 @@ fun PostJobScreen(
                 text = "You can review your request before confirming.",
                 modifier = Modifier.fillMaxWidth(),
                 fontSize = 12.sp,
-                color = ServexaGray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(
@@ -647,9 +682,9 @@ private fun ServiceCard(
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (selected) {
-                ServexaLightPurple
+                MaterialTheme.colorScheme.surfaceVariant
             } else {
-                Color.White
+                MaterialTheme.colorScheme.surface
             }
         ),
         elevation = CardDefaults.cardElevation(
@@ -670,9 +705,9 @@ private fun ServiceCard(
                 contentDescription = service.name,
                 modifier = Modifier.size(30.dp),
                 tint = if (selected) {
-                    ServexaDarkPurple
+                    MaterialTheme.colorScheme.primary
                 } else {
-                    ServexaPurple
+                    MaterialTheme.colorScheme.primary
                 }
             )
 
@@ -688,7 +723,7 @@ private fun ServiceCard(
                 } else {
                     FontWeight.Medium
                 },
-                color = ServexaText
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }

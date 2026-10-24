@@ -33,7 +33,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -106,7 +108,7 @@ fun JobsScreen(
     }
 
     Scaffold(
-        containerColor = ServexaBackground,
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             JobsBottomBar(
                 onHomeClick = onHomeClick,
@@ -120,7 +122,7 @@ fun JobsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(ServexaBackground)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             JobsTopHeader(
                 jobCount = jobs.size,
@@ -137,7 +139,7 @@ fun JobsScreen(
                 placeholder = {
                     Text(
                         text = "Search jobs, customers...",
-                        color = ServexaMuted,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 14.sp
                     )
                 },
@@ -145,17 +147,19 @@ fun JobsScreen(
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search jobs",
-                        tint = ServexaMuted
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(15.dp),
-                colors = androidx.compose.material3.TextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedIndicatorColor = ServexaPrimary,
-                    unfocusedIndicatorColor = ServexaBorder,
-                    cursorColor = ServexaPrimary
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    cursorColor = MaterialTheme.colorScheme.primary
                 )
             )
 
@@ -171,13 +175,13 @@ fun JobsScreen(
                     text = if (searchText.isBlank()) "Your jobs" else "Search results",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = ServexaInk
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
                 Text(
                     text = "${filteredJobs.size} found",
                     fontSize = 13.sp,
-                    color = ServexaMuted
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -287,7 +291,7 @@ private fun JobsTopHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(
                 start = 22.dp,
                 end = 22.dp,
@@ -304,7 +308,7 @@ private fun JobsTopHeader(
                 Text(
                     text = "Work overview",
                     fontSize = 13.sp,
-                    color = ServexaMuted
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(modifier = Modifier.height(5.dp))
@@ -313,7 +317,7 @@ private fun JobsTopHeader(
                     text = "My Jobs",
                     fontSize = 29.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = ServexaInk
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
 
@@ -321,13 +325,13 @@ private fun JobsTopHeader(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(ServexaPurpleLight),
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.WorkOutline,
                     contentDescription = "My jobs",
-                    tint = ServexaPrimary,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(25.dp)
                 )
             }
@@ -343,7 +347,7 @@ private fun JobsTopHeader(
                 modifier = Modifier.weight(1f),
                 label = "Total jobs",
                 value = jobCount.toString(),
-                accent = ServexaPrimary
+                accent = MaterialTheme.colorScheme.primary
             )
 
             SummaryItem(
@@ -373,7 +377,7 @@ private fun SummaryItem(
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(15.dp))
-            .background(ServexaBackground)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(horizontal = 12.dp, vertical = 13.dp)
     ) {
         Text(
@@ -388,7 +392,7 @@ private fun SummaryItem(
         Text(
             text = label,
             fontSize = 11.sp,
-            color = ServexaMuted,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -410,7 +414,7 @@ fun JobCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(19.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 0.dp
@@ -428,13 +432,13 @@ fun JobCard(
                     modifier = Modifier
                         .size(45.dp)
                         .clip(RoundedCornerShape(13.dp))
-                        .background(ServexaPurpleLight),
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Build,
                         contentDescription = "Service",
-                        tint = ServexaPrimary,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -448,7 +452,7 @@ fun JobCard(
                         text = job.title.ifBlank { "Service request" },
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = ServexaInk,
+                        color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -458,7 +462,7 @@ fun JobCard(
                     Text(
                         text = "Customer: ${job.customerName.ifBlank { "Customer" }}",
                         fontSize = 12.sp,
-                        color = ServexaMuted,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -477,14 +481,14 @@ fun JobCard(
                 },
                 fontSize = 13.sp,
                 lineHeight = 19.sp,
-                color = Color(0xFF656B7E),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            HorizontalDivider(color = ServexaBorder)
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
             Spacer(modifier = Modifier.height(13.dp))
 
@@ -497,7 +501,7 @@ fun JobCard(
                     Text(
                         text = "Estimated price",
                         fontSize = 11.sp,
-                        color = ServexaMuted
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     Spacer(modifier = Modifier.height(3.dp))
@@ -506,7 +510,7 @@ fun JobCard(
                         text = "₹${"%.0f".format(java.util.Locale("en", "IN"), job.price)}",
                         fontSize = 21.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = ServexaInk
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
@@ -515,7 +519,7 @@ fun JobCard(
                 ) {
                     Text(
                         text = "Details",
-                        color = ServexaPrimary,
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold
                     )
 
@@ -543,7 +547,8 @@ fun JobCard(
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = ServexaPrimary
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = Color.White
                             )
                         ) {
                             Text("Accept job")
@@ -554,8 +559,8 @@ fun JobCard(
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = ServexaRedLight,
-                                contentColor = ServexaRed
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer
                             )
                         ) {
                             Text("Decline")
@@ -575,8 +580,8 @@ fun JobCard(
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = ServexaPurpleLight,
-                                contentColor = ServexaPrimary
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = MaterialTheme.colorScheme.primary
                             )
                         ) {
                             Icon(
@@ -595,7 +600,8 @@ fun JobCard(
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = ServexaPrimary
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = Color.White
                             )
                         ) {
                             Text("Complete job")
@@ -614,10 +620,10 @@ fun JobStatusBadge(status: String) {
             Triple("Completed", ServexaGreenLight, ServexaGreen)
 
         status.equals("Accepted", ignoreCase = true) ->
-            Triple("Accepted", ServexaPurpleLight, ServexaPrimary)
+            Triple("Accepted", MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.primary)
 
         status.equals("Rejected", ignoreCase = true) ->
-            Triple("Declined", ServexaRedLight, ServexaRed)
+            Triple("Declined", MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.onErrorContainer)
 
         else ->
             Triple("Pending", ServexaOrangeLight, ServexaOrange)
@@ -661,13 +667,13 @@ private fun MessageState(
             modifier = Modifier
                 .size(64.dp)
                 .clip(CircleShape)
-                .background(ServexaPurpleLight),
+                .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Default.WorkOutline,
                 contentDescription = null,
-                tint = ServexaPrimary,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(29.dp)
             )
         }
@@ -678,7 +684,7 @@ private fun MessageState(
             text = title,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = ServexaInk
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -687,7 +693,7 @@ private fun MessageState(
             text = message,
             fontSize = 13.sp,
             lineHeight = 19.sp,
-            color = ServexaMuted
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         if (actionLabel != null) {
@@ -696,7 +702,7 @@ private fun MessageState(
             TextButton(onClick = onAction) {
                 Text(
                     text = actionLabel,
-                    color = ServexaPrimary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -711,7 +717,7 @@ fun JobsBottomBar(
     onProfileClick: () -> Unit
 ) {
     Surface(
-        color = Color.White,
+        color = MaterialTheme.colorScheme.surface,
         shadowElevation = 8.dp
     ) {
         Row(
@@ -755,8 +761,6 @@ fun JobsBottomItem(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    val tint = if (selected) ServexaPrimary else ServexaMuted
-
     Column(
         modifier = Modifier
             .clip(
@@ -780,9 +784,9 @@ fun JobsBottomItem(
 
             tint =
                 if (selected) {
-                    ServexaPurple
+                    MaterialTheme.colorScheme.primary
                 } else {
-                    ServexaSecondaryText
+                    MaterialTheme.colorScheme.onSurfaceVariant
                 },
 
             modifier = Modifier.size(20.dp)
@@ -808,9 +812,9 @@ fun JobsBottomItem(
 
             color =
                 if (selected) {
-                    ServexaPurple
+                    MaterialTheme.colorScheme.primary
                 } else {
-                    ServexaSecondaryText
+                    MaterialTheme.colorScheme.onSurfaceVariant
                 }
         )
     }

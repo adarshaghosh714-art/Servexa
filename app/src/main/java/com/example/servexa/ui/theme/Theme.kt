@@ -1,53 +1,56 @@
 package com.example.servexa.ui.theme
 
-import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Color(0xFF8075FF),
+    secondary = androidx.compose.ui.graphics.Color(0xFFBCA6FF),
+    tertiary = androidx.compose.ui.graphics.Color(0xFFFFB52E),
+
+    background = androidx.compose.ui.graphics.Color(0xFF121218),
+    surface = androidx.compose.ui.graphics.Color(0xFF1C1B22),
+    surfaceVariant = androidx.compose.ui.graphics.Color(0xFF282732),
+
+    onBackground = androidx.compose.ui.graphics.Color(0xFFF4F2F8),
+    onSurface = androidx.compose.ui.graphics.Color(0xFFF4F2F8),
+    onSurfaceVariant = androidx.compose.ui.graphics.Color(0xFFBDB8C9),
+
+    outline = androidx.compose.ui.graphics.Color(0xFF777181),
+    outlineVariant = Color(0xFF353342)
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = Color(0xFF6750F5),
+    secondary = Color(0xFF5141D9),
+    tertiary = Color(0xFFFF941F),
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    background = Color(0xFFF8F7FC),
+    surface = androidx.compose.ui.graphics.Color(0xFFFFFFFF),
+    surfaceVariant = androidx.compose.ui.graphics.Color(0xFFF1EFFF),
+
+    onBackground = androidx.compose.ui.graphics.Color(0xFF18181B),
+    onSurface = androidx.compose.ui.graphics.Color(0xFF18181B),
+    onSurfaceVariant = androidx.compose.ui.graphics.Color(0xFF71717A),
+
+    outline = androidx.compose.ui.graphics.Color(0xFFA1A1AA),
+    outlineVariant = androidx.compose.ui.graphics.Color(0xFFE4E4E7)
 )
 
 @Composable
 fun ServexaTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    val colorScheme = if (darkTheme) {
+        DarkColorScheme
+    } else {
+        LightColorScheme
     }
 
     MaterialTheme(

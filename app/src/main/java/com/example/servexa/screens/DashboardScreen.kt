@@ -19,16 +19,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.SegmentedButtonDefaults.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -91,7 +89,7 @@ fun DashboardScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(ServexaBackground)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(
             modifier = Modifier
@@ -116,10 +114,6 @@ fun DashboardScreen(
                         pendingJobs = pendingJobs,
                         completedJobs = completedJobs
                     )
-                }
-
-                item {
-                    QuickActions()
                 }
 
                 item {
@@ -167,7 +161,7 @@ fun DashboardHeader(
                 text = "Good morning, $userName 👋",
                 fontSize = 26.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = ServexaDarkBlue
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -175,7 +169,7 @@ fun DashboardHeader(
             Text(
                 text = "Here's your Servexa overview",
                 fontSize = 14.sp,
-                color = Color(0xFF7A8195)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
@@ -294,90 +288,7 @@ fun DashboardStat(
 }
 
 // ======================================================
-// QUICK ACTIONS
-// ======================================================
-
-@Composable
-fun QuickActions() {
-    Column {
-        Text(
-            text = "Quick Actions",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = ServexaDarkBlue
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            ActionCard(
-                modifier = Modifier.weight(1f),
-                icon = Icons.Default.Add,
-                title = "Add Job"
-            )
-
-            ActionCard(
-                modifier = Modifier.weight(1f),
-                icon = Icons.Default.Group,
-                title = "Customers"
-            )
-        }
-    }
-}
-
-// ======================================================
-// ACTION CARD
-// ======================================================
-
-@Composable
-fun ActionCard(
-    modifier: Modifier,
-    icon: ImageVector,
-    title: String
-) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(18.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(ServexaLightPurple),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    tint = ServexaPurple
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = title,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                color = ServexaDarkBlue
-            )
-        }
-    }
-}
-
-// ======================================================
-// RECENT JOBS - REAL FIRESTORE DATA
+// RECENT JOBS
 // ======================================================
 
 @Composable
@@ -389,44 +300,58 @@ fun RecentJobs(
             text = "Recent Jobs",
             fontSize = 20.sp,
             fontWeight = FontWeight.ExtraBold,
-            color = ServexaDarkBlue
+            color = MaterialTheme.colorScheme.onBackground
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         if (jobs.isEmpty()) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp),
+                shape = RoundedCornerShape(22.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(22.dp),
+                        .padding(
+                            horizontal = 24.dp,
+                            vertical = 36.dp
+                        ),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Build,
-                        contentDescription = null,
-                        tint = ServexaPurple,
-                        modifier = Modifier.size(30.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Build,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
                         text = "No jobs available yet",
-                        fontWeight = FontWeight.SemiBold,
-                        color = ServexaDarkBlue
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
+
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
                         text = "Your assigned jobs will appear here.",
                         fontSize = 13.sp,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -438,7 +363,7 @@ fun RecentJobs(
                     status = job.status.uppercase()
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(14.dp))
             }
         }
     }
@@ -458,7 +383,7 @@ fun JobItem(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
         Row(
@@ -471,13 +396,13 @@ fun JobItem(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(ServexaLightPurple),
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Build,
                     contentDescription = "Job",
-                    tint = ServexaPurple
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
 
@@ -489,7 +414,7 @@ fun JobItem(
                 Text(
                     text = title,
                     fontWeight = FontWeight.Bold,
-                    color = ServexaDarkBlue
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(3.dp))
@@ -497,7 +422,7 @@ fun JobItem(
                 Text(
                     text = customer.ifBlank { "Customer" },
                     fontSize = 13.sp,
-                    color = Color(0xFF7A8195)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -509,7 +434,7 @@ fun JobItem(
                     "PENDING" -> ServexaOrange
                     "COMPLETED" -> Color(0xFF35A66F)
                     "ACCEPTED" -> ServexaBlue
-                    else -> Color(0xFF7A8195)
+                    else -> MaterialTheme.colorScheme.onSurfaceVariant
                 }
             )
         }
@@ -530,7 +455,7 @@ fun DashboardBottomBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(
                 horizontal = 24.dp,
                 vertical = 14.dp
@@ -581,9 +506,7 @@ fun BottomItem(
 ) {
     Column(
         modifier = Modifier
-            .clip(
-                RoundedCornerShape(10.dp)
-            )
+            .clip(RoundedCornerShape(10.dp))
             .clickable {
                 onClick()
             }
@@ -591,49 +514,34 @@ fun BottomItem(
                 horizontal = 12.dp,
                 vertical = 5.dp
             ),
-
-        horizontalAlignment =
-            Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Icon(
             imageVector = icon,
             contentDescription = label,
-
-            tint =
-                if (selected) {
-                    ServexaPurple
-                } else {
-                    ServexaSecondaryText
-                },
-
+            tint = if (selected) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
             modifier = Modifier.size(20.dp)
         )
 
-
-        Spacer(
-            modifier = Modifier.height(3.dp)
-        )
-
+        Spacer(modifier = Modifier.height(3.dp))
 
         Text(
             text = label,
-
             fontSize = 10.sp,
-
-            fontWeight =
-                if (selected) {
-                    FontWeight.Bold
-                } else {
-                    FontWeight.Medium
-                },
-
-            color =
-                if (selected) {
-                    ServexaPurple
-                } else {
-                    ServexaSecondaryText
-                }
+            fontWeight = if (selected) {
+                FontWeight.Bold
+            } else {
+                FontWeight.Medium
+            },
+            color = if (selected) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            }
         )
     }
 }

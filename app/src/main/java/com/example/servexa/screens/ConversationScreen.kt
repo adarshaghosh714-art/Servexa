@@ -1,6 +1,7 @@
 
 package com.example.servexa.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -115,7 +116,7 @@ fun ConversationsScreen(
     }
 
     Scaffold(
-        containerColor = ChatBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
 
         Column(
@@ -142,14 +143,14 @@ fun ConversationsScreen(
                     Text(
                         "Search people or messages",
                         fontSize = 14.sp,
-                        color = ChatSecondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
-                        tint = ChatPurple
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 },
                 trailingIcon = {
@@ -160,7 +161,7 @@ fun ConversationsScreen(
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Clear search",
-                                tint = ChatSecondary
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -168,11 +169,13 @@ fun ConversationsScreen(
                 singleLine = true,
                 shape = RoundedCornerShape(18.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedBorderColor = ChatPurple,
-                    unfocusedBorderColor = ChatBorder,
-                    cursorColor = ChatPurple
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    cursorColor = MaterialTheme.colorScheme.primary
                 )
             )
 
@@ -188,7 +191,7 @@ fun ConversationsScreen(
                     text = "Your conversations",
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
-                    color = ChatText
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
                 Spacer(Modifier.weight(1f))
@@ -197,7 +200,7 @@ fun ConversationsScreen(
                     text = "${filteredConversations.size} chats",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
-                    color = ChatSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -419,16 +422,14 @@ private fun ConversationCard(
             .fillMaxWidth()
             .shadow(
                 elevation = 2.dp,
-                shape = RoundedCornerShape(22.dp),
-                ambientColor = Color(0x140D0B2A),
-                spotColor = Color(0x140D0B2A)
+                shape = RoundedCornerShape(22.dp)
             )
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(22.dp),
-        color = Color.White,
-        border = androidx.compose.foundation.BorderStroke(
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(
             width = 1.dp,
-            color = ChatBorder
+            color = MaterialTheme.colorScheme.outlineVariant
         )
     ) {
         Row(
@@ -470,7 +471,7 @@ private fun ConversationCard(
                         modifier = Modifier.weight(1f, fill = false),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        color = ChatText,
+                        color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -489,7 +490,7 @@ private fun ConversationCard(
                     Text(
                         text = timeText,
                         fontSize = 10.sp,
-                        color = ChatSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1
                     )
                 }
@@ -501,7 +502,7 @@ private fun ConversationCard(
                         "Start your conversation"
                     },
                     fontSize = 12.sp,
-                    color = ChatSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     lineHeight = 17.sp
@@ -515,25 +516,25 @@ private fun ConversationCard(
                     Icon(
                         imageVector = Icons.Default.ChatBubbleOutline,
                         contentDescription = null,
-                        tint = ChatPurple,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(12.dp)
                     )
 
                     Spacer(Modifier.width(5.dp))
 
                     Surface(
-                        color = ChatLavender,
+                        color = MaterialTheme.colorScheme.surfaceVariant,
                         shape = RoundedCornerShape(7.dp)
                     ) {
                         Text(
-                            text = "Booking ${conversation.jobId}",
+                            text = "Chat with $otherUserName",
                             modifier = Modifier.padding(
                                 horizontal = 8.dp,
                                 vertical = 4.dp
                             ),
                             fontSize = 10.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = ChatPurpleDark,
+                            color = MaterialTheme.colorScheme.primary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -554,7 +555,7 @@ private fun LoadingConversations() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             CircularProgressIndicator(
-                color = ChatPurple,
+                color = MaterialTheme.colorScheme.primary,
                 strokeWidth = 3.dp,
                 modifier = Modifier.size(34.dp)
             )
@@ -563,7 +564,7 @@ private fun LoadingConversations() {
 
             Text(
                 text = "Loading your conversations...",
-                color = ChatSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 13.sp
             )
         }
@@ -590,7 +591,7 @@ private fun ConversationMessageState(
                 modifier = Modifier
                     .size(86.dp)
                     .background(
-                        color = ChatLavender,
+                        color = MaterialTheme.colorScheme.surfaceVariant,
                         shape = RoundedCornerShape(28.dp)
                     ),
                 contentAlignment = Alignment.Center
@@ -598,7 +599,7 @@ private fun ConversationMessageState(
                 Icon(
                     imageVector = Icons.Default.ChatBubbleOutline,
                     contentDescription = null,
-                    tint = ChatPurple,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(38.dp)
                 )
             }
@@ -609,7 +610,7 @@ private fun ConversationMessageState(
                 text = title,
                 fontSize = 19.sp,
                 fontWeight = FontWeight.Bold,
-                color = ChatText
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(Modifier.height(9.dp))
@@ -617,7 +618,7 @@ private fun ConversationMessageState(
             Text(
                 text = description,
                 fontSize = 13.sp,
-                color = ChatSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 20.sp,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
@@ -628,7 +629,8 @@ private fun ConversationMessageState(
                 Button(
                     onClick = onRetry,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = ChatPurple
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = Color.White
                     ),
                     shape = RoundedCornerShape(14.dp)
                 ) {

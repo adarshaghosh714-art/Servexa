@@ -113,7 +113,7 @@ fun ChatScreen(
     }
 
     Scaffold(
-        containerColor = ChatBackground,
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             MessageInputBar(
                 messageText = messageText,
@@ -128,15 +128,7 @@ fun ChatScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFFF0EEFF),
-                            ChatBackground,
-                            Color.White
-                        )
-                    )
-                )
+                .background(MaterialTheme.colorScheme.background)
         ) {
 
             // Chat header.
@@ -297,9 +289,9 @@ private fun MessageBubble(
                 .widthIn(max = 300.dp)
                 .background(
                     color = if (isMine) {
-                        ChatPurple
+                        MaterialTheme.colorScheme.primary
                     } else {
-                        IncomingBubble
+                        MaterialTheme.colorScheme.surface
                     },
                     shape = RoundedCornerShape(
                         topStart = 18.dp,
@@ -316,7 +308,7 @@ private fun MessageBubble(
 
             Text(
                 text = message.text,
-                color = if (isMine) Color.White else ChatText,
+                color = if (isMine) Color.White else MaterialTheme.colorScheme.onSurface,
                 fontSize = 15.sp,
                 lineHeight = 21.sp
             )
@@ -329,7 +321,7 @@ private fun MessageBubble(
                 color = if (isMine) {
                     Color.White.copy(alpha = 0.75f)
                 } else {
-                    ChatSecondary
+                    MaterialTheme.colorScheme.onSurfaceVariant
                 },
                 fontSize = 10.sp
             )
@@ -345,7 +337,7 @@ private fun MessageInputBar(
     onKeyboardSend: () -> Unit
 ) {
     Surface(
-        color = Color.White,
+        color = MaterialTheme.colorScheme.surface,
         shadowElevation = 12.dp
     ) {
         Row(
@@ -365,7 +357,7 @@ private fun MessageInputBar(
                 placeholder = {
                     Text(
                         text = "Write a message...",
-                        color = ChatSecondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
                 shape = RoundedCornerShape(26.dp),
@@ -377,11 +369,13 @@ private fun MessageInputBar(
                     onSend = { onKeyboardSend() }
                 ),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = ChatPurple,
-                    unfocusedBorderColor = Color(0xFFE4E4E7),
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    cursorColor = ChatPurple
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    cursorColor = MaterialTheme.colorScheme.primary
                 )
             )
 
@@ -394,9 +388,9 @@ private fun MessageInputBar(
                     .clip(CircleShape)
                     .background(
                         if (messageText.isNotBlank()) {
-                            ChatPurple
+                            MaterialTheme.colorScheme.primary
                         } else {
-                            Color(0xFFE4E4E7)
+                            MaterialTheme.colorScheme.surfaceVariant
                         }
                     )
             ) {
@@ -406,7 +400,7 @@ private fun MessageInputBar(
                     tint = if (messageText.isNotBlank()) {
                         Color.White
                     } else {
-                        ChatSecondary
+                        MaterialTheme.colorScheme.onSurfaceVariant
                     }
                 )
             }

@@ -32,6 +32,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -156,10 +157,14 @@ fun RegisterScreenContent(
     }
 
 
+    val bgColor = MaterialTheme.colorScheme.background
+    val textColor = MaterialTheme.colorScheme.onBackground
+    val secondaryText = MaterialTheme.colorScheme.onSurfaceVariant
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(ServexaBackground)
+            .background(bgColor)
             .verticalScroll(rememberScrollState())
             .padding(
                 horizontal = 24.dp,
@@ -202,7 +207,7 @@ fun RegisterScreenContent(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.5.sp,
-                color = ServexaText
+                color = textColor
             )
         }
 
@@ -220,7 +225,7 @@ fun RegisterScreenContent(
             text = "Create your account",
             fontSize = 30.sp,
             fontWeight = FontWeight.Bold,
-            color = ServexaText
+            color = textColor
         )
 
         Spacer(
@@ -230,7 +235,7 @@ fun RegisterScreenContent(
         Text(
             text = "Set up your Servexa profile to get started.",
             fontSize = 15.sp,
-            color = ServexaSecondaryText
+            color = secondaryText
         )
 
 
@@ -591,7 +596,7 @@ private fun SectionTitle(
         fontSize = 12.sp,
         fontWeight = FontWeight.Bold,
         letterSpacing = 0.8.sp,
-        color = ServexaSecondaryText
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
 
@@ -646,12 +651,17 @@ private fun ServexaTextField(
 @Composable
 private fun ServexaTextFieldColors() =
     OutlinedTextFieldDefaults.colors(
-        focusedBorderColor = ServexaPurple,
-        unfocusedBorderColor = ServexaBorder,
-        focusedLabelColor = ServexaPurple,
-        cursorColor = ServexaPurple,
-        focusedLeadingIconColor = ServexaPurple,
-        unfocusedLeadingIconColor = ServexaSecondaryText
+        focusedBorderColor = MaterialTheme.colorScheme.primary,
+        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+        focusedLabelColor = MaterialTheme.colorScheme.primary,
+        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        cursorColor = MaterialTheme.colorScheme.primary,
+        focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
+        unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+        unfocusedTextColor = MaterialTheme.colorScheme.onSurface
     )
 
 
@@ -677,18 +687,18 @@ private fun RoleCard(
 
         colors = CardDefaults.cardColors(
             containerColor = if (selected) {
-                ServexaPurpleSoft
+                MaterialTheme.colorScheme.surfaceVariant
             } else {
-                Color.White
+                MaterialTheme.colorScheme.surface
             }
         ),
 
         border = BorderStroke(
             width = if (selected) 1.5.dp else 1.dp,
             color = if (selected) {
-                ServexaPurple
+                MaterialTheme.colorScheme.primary
             } else {
-                ServexaBorder
+                MaterialTheme.colorScheme.outlineVariant
             }
         ),
 
@@ -710,9 +720,9 @@ private fun RoleCard(
                     .size(42.dp)
                     .background(
                         color = if (selected) {
-                            ServexaPurple
+                            MaterialTheme.colorScheme.primary
                         } else {
-                            Color(0xFFF4F4F5)
+                            MaterialTheme.colorScheme.surfaceVariant
                         },
                         shape = RoundedCornerShape(11.dp)
                     ),
@@ -727,7 +737,7 @@ private fun RoleCard(
                     tint = if (selected) {
                         Color.White
                     } else {
-                        ServexaSecondaryText
+                        MaterialTheme.colorScheme.onSurfaceVariant
                     },
 
                     modifier = Modifier.size(21.dp)
@@ -748,7 +758,7 @@ private fun RoleCard(
                     text = title,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
-                    color = ServexaText
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(
@@ -758,7 +768,7 @@ private fun RoleCard(
                 Text(
                     text = description,
                     fontSize = 12.sp,
-                    color = ServexaSecondaryText
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -769,7 +779,7 @@ private fun RoleCard(
                     modifier = Modifier
                         .size(24.dp)
                         .background(
-                            color = ServexaPurple,
+                            color = MaterialTheme.colorScheme.primary,
                             shape = RoundedCornerShape(50)
                         ),
 

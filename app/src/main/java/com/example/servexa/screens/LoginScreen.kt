@@ -1,8 +1,10 @@
+
 package com.example.servexa.screens
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,15 +22,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -50,7 +53,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -59,7 +61,6 @@ import com.example.servexa.viewModel.AuthViewModel
 private val ServexaBlue = Color(0xFF315FEA)
 private val ServexaDarkBlue = Color(0xFF18264A)
 private val ServexaPurple = Color(0xFF7657F5)
-private val ServexaLightPurple = Color(0xFFE9E7FF)
 private val ServexaOrange = Color(0xFFFF941F)
 private val ServexaYellow = Color(0xFFFFB52E)
 private val ServexaFieldBackground = Color(0xFFF8F9FF)
@@ -70,61 +71,51 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit = {},
     onSignUpClick: () -> Unit = {}
 ) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
 
-
-    var email by remember {
-        mutableStateOf("")
-    }
-
-    var password by remember {
-        mutableStateOf("")
-    }
-
-    var passwordVisible by remember {
-        mutableStateOf(false)
-    }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     LaunchedEffect(uiState.isLoggedIn) {
         if (uiState.isLoggedIn) {
             onLoginSuccess()
         }
     }
 
+    val bgColor = MaterialTheme.colorScheme.background
+    val textColor = MaterialTheme.colorScheme.onBackground
+    val secondaryTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
+    val outlineVariant = MaterialTheme.colorScheme.outlineVariant
+    val primaryColor = MaterialTheme.colorScheme.primary
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(bgColor)
     ) {
-
-
+        // Top background wave
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(330.dp)
         ) {
-
             val width = size.width
             val height = size.height
-
 
             drawRect(
                 color = ServexaBlue,
                 size = Size(width, height)
             )
 
-
             val lightPath = Path().apply {
                 moveTo(0f, height * 0.18f)
-
                 cubicTo(
-                    width * 0.30f,
-                    height * 0.05f,
-                    width * 0.65f,
-                    height * 0.20f,
-                    width,
-                    height * 0.05f
+                    width * 0.30f, height * 0.05f,
+                    width * 0.65f, height * 0.20f,
+                    width, height * 0.05f
                 )
-
                 lineTo(width, height)
                 lineTo(0f, height)
                 close()
@@ -132,22 +123,16 @@ fun LoginScreen(
 
             drawPath(
                 path = lightPath,
-                color = Color(0xFFB7C8FF)
+                color = Color(0xFFB7C8FF).copy(alpha = 0.5f)
             )
-
 
             val whitePath = Path().apply {
                 moveTo(0f, height * 0.35f)
-
                 cubicTo(
-                    width * 0.35f,
-                    height * 0.15f,
-                    width * 0.55f,
-                    height * 0.55f,
-                    width,
-                    height * 0.45f
+                    width * 0.35f, height * 0.15f,
+                    width * 0.55f, height * 0.55f,
+                    width, height * 0.45f
                 )
-
                 lineTo(width, height)
                 lineTo(0f, height)
                 close()
@@ -155,10 +140,9 @@ fun LoginScreen(
 
             drawPath(
                 path = whitePath,
-                color = Color.White
+                color = bgColor
             )
         }
-
 
         Column(
             modifier = Modifier
@@ -172,19 +156,14 @@ fun LoginScreen(
                     bottom = 30.dp
                 )
         ) {
-
-
+            // Servexa branding
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
                 Box(
                     modifier = Modifier
                         .size(52.dp)
-                        .shadow(
-                            elevation = 8.dp,
-                            shape = CircleShape
-                        )
+                        .shadow(8.dp, CircleShape)
                         .clip(CircleShape)
                         .background(
                             Brush.linearGradient(
@@ -196,7 +175,6 @@ fun LoginScreen(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-
                     Text(
                         text = "S",
                         fontSize = 30.sp,
@@ -205,17 +183,14 @@ fun LoginScreen(
                     )
                 }
 
-                Spacer(
-                    modifier = Modifier.width(12.dp)
-                )
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Column {
-
                     Text(
                         text = "Servexa",
                         fontSize = 28.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = ServexaDarkBlue
+                        color = textColor
                     )
 
                     Text(
@@ -223,24 +198,20 @@ fun LoginScreen(
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.2.sp,
-                        color = ServexaBlue
+                        color = primaryColor
                     )
                 }
             }
 
-            Spacer(
-                modifier = Modifier.height(35.dp)
-            )
+            Spacer(modifier = Modifier.height(35.dp))
 
-
+            // Illustration
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(175.dp),
                 contentAlignment = Alignment.Center
             ) {
-
-
                 Box(
                     modifier = Modifier
                         .size(165.dp)
@@ -262,18 +233,14 @@ fun LoginScreen(
                         )
                 )
 
-
                 Box(
                     modifier = Modifier
                         .size(75.dp)
                         .align(Alignment.Center)
-                        .clip(
-                            RoundedCornerShape(38.dp)
-                        )
+                        .clip(RoundedCornerShape(38.dp))
                         .background(Color(0xFF24304F)),
                     contentAlignment = Alignment.Center
                 ) {
-
                     Text(
                         text = "S",
                         fontSize = 34.sp,
@@ -281,7 +248,6 @@ fun LoginScreen(
                         color = Color.White
                     )
                 }
-
 
                 Box(
                     modifier = Modifier
@@ -291,7 +257,6 @@ fun LoginScreen(
                         .background(ServexaOrange),
                     contentAlignment = Alignment.Center
                 ) {
-
                     Icon(
                         imageVector = Icons.Default.Build,
                         contentDescription = "Tools",
@@ -299,7 +264,6 @@ fun LoginScreen(
                         modifier = Modifier.size(27.dp)
                     )
                 }
-
 
                 Box(
                     modifier = Modifier
@@ -309,7 +273,6 @@ fun LoginScreen(
                         .background(Color(0xFFFFA027)),
                     contentAlignment = Alignment.Center
                 ) {
-
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = "Settings",
@@ -318,129 +281,111 @@ fun LoginScreen(
                     )
                 }
 
-
                 Box(
                     modifier = Modifier
                         .size(48.dp)
                         .align(Alignment.TopEnd)
                         .clip(CircleShape)
-                        .background(Color.White),
+                        .background(MaterialTheme.colorScheme.surface),
                     contentAlignment = Alignment.Center
                 ) {
-
                     Icon(
                         imageVector = Icons.Default.AccessTime,
                         contentDescription = "Time",
-                        tint = ServexaDarkBlue,
+                        tint = primaryColor,
                         modifier = Modifier.size(29.dp)
                     )
                 }
             }
 
-            Spacer(
-                modifier = Modifier.height(20.dp)
-            )
-
+            Spacer(modifier = Modifier.height(20.dp))
 
             Text(
                 text = "Welcome back 👋",
                 fontSize = 30.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = ServexaDarkBlue
+                color = textColor
             )
 
-            Spacer(
-                modifier = Modifier.height(6.dp)
-            )
+            Spacer(modifier = Modifier.height(6.dp))
 
             Text(
                 text = "Sign in to continue your journey",
                 fontSize = 15.sp,
-                color = Color(0xFF7A8195)
+                color = secondaryTextColor
             )
 
-            Spacer(
-                modifier = Modifier.height(28.dp)
-            )
+            Spacer(modifier = Modifier.height(28.dp))
 
-
+            // Email field
             Text(
                 text = "Email Address",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = ServexaDarkBlue
+                color = textColor
             )
 
-            Spacer(
-                modifier = Modifier.height(8.dp)
-            )
+            Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
                 value = email,
-                onValueChange = {
-                    email = it
-                },
+                onValueChange = { email = it },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
                     Text(
                         text = "Enter your email",
-                        color = Color(0xFF9AA0B3)
+                        color = secondaryTextColor
                     )
                 },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Email,
                         contentDescription = "Email",
-                        tint = ServexaBlue
+                        tint = primaryColor
                     )
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = ServexaBlue,
-                    unfocusedBorderColor = Color(0xFFD9DDEA),
-                    focusedContainerColor = ServexaFieldBackground,
-                    unfocusedContainerColor = ServexaFieldBackground
+                    focusedBorderColor = primaryColor,
+                    unfocusedBorderColor = outlineVariant,
+                    focusedContainerColor = surfaceVariant,
+                    unfocusedContainerColor = surfaceVariant,
+                    focusedTextColor = textColor,
+                    unfocusedTextColor = textColor
                 )
             )
 
-            Spacer(
-                modifier = Modifier.height(18.dp)
-            )
+            Spacer(modifier = Modifier.height(18.dp))
 
-
+            // Password field
             Text(
                 text = "Password",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = ServexaDarkBlue
+                color = textColor
             )
 
-            Spacer(
-                modifier = Modifier.height(8.dp)
-            )
+            Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
                 value = password,
-                onValueChange = {
-                    password = it
-                },
+                onValueChange = { password = it },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
                     Text(
                         text = "Enter your password",
-                        color = Color(0xFF9AA0B3)
+                        color = secondaryTextColor
                     )
                 },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Lock,
                         contentDescription = "Password",
-                        tint = ServexaBlue
+                        tint = primaryColor
                     )
                 },
                 trailingIcon = {
-
                     Icon(
                         imageVector = if (passwordVisible) {
                             Icons.Default.VisibilityOff
@@ -452,7 +397,7 @@ fun LoginScreen(
                         } else {
                             "Show password"
                         },
-                        tint = Color(0xFF747C95),
+                        tint = secondaryTextColor,
                         modifier = Modifier.clickable {
                             passwordVisible = !passwordVisible
                         }
@@ -466,35 +411,22 @@ fun LoginScreen(
                 singleLine = true,
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = ServexaBlue,
-                    unfocusedBorderColor = Color(0xFFD9DDEA),
-                    focusedContainerColor = ServexaFieldBackground,
-                    unfocusedContainerColor = ServexaFieldBackground
+                    focusedBorderColor = primaryColor,
+                    unfocusedBorderColor = outlineVariant,
+                    focusedContainerColor = surfaceVariant,
+                    unfocusedContainerColor = surfaceVariant,
+                    focusedTextColor = textColor,
+                    unfocusedTextColor = textColor
                 )
             )
 
-            Spacer(
-                modifier = Modifier.height(10.dp)
-            )
 
 
-            Text(
-                text = "Forgot password?",
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .clickable {
-                        // Password reset will be added with Firebase
-                    },
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = ServexaBlue
-            )
-
-            Spacer(
-                modifier = Modifier.height(24.dp)
-            )
 
 
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Login button: text and arrow are centered together.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -512,49 +444,44 @@ fun LoginScreen(
                             )
                         )
                     )
-                    .clickable {
-                        viewModel.login(email = email, password = password)
+                    .clickable(enabled = !uiState.isLoading) {
+                        viewModel.login(
+                            email = email.trim(),
+                            password = password
+                        )
                     },
                 contentAlignment = Alignment.Center
             ) {
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-                    if (uiState.isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.White,
+                        strokeWidth = 2.5.dp
+                    )
+                } else {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "LOGIN",
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.ExtraBold,
                             color = Color.White
                         )
-                    }else{
-                        Row (verticalAlignment = Alignment.CenterVertically){
-                            Text(
-                                text = "LOGIN",
-                                fontSize = 17.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = Color.White
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
 
-                        }
+                        Icon(
+                            imageVector = Icons.Default.ArrowForward,
+                            contentDescription = "Login",
+                            tint = Color.White,
+                            modifier = Modifier.size(23.dp)
+                        )
                     }
-
-                    }
-
-                    Spacer(
-                        modifier = Modifier.width(12.dp)
-                    )
-
-                    Icon(
-                        imageVector = Icons.Default.ArrowForward,
-                        contentDescription = "Login",
-                        tint = Color.White,
-                        modifier = Modifier.size(23.dp)
-                    )
                 }
-            uiState.errorMessage?.let { error ->
+            }
 
+            // Login error
+            uiState.errorMessage?.let { error ->
                 Text(
                     text = error,
                     color = Color.Red,
@@ -562,12 +489,9 @@ fun LoginScreen(
                 )
             }
 
+            Spacer(modifier = Modifier.height(28.dp))
 
-            Spacer(
-                modifier = Modifier.height(28.dp)
-            )
-
-
+            // Sign-up navigation
             Row(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
@@ -576,7 +500,6 @@ fun LoginScreen(
                     },
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
                 Text(
                     text = "Don't have an account? ",
                     fontSize = 14.sp,
@@ -591,44 +514,31 @@ fun LoginScreen(
                 )
             }
 
-            Spacer(
-                modifier = Modifier.height(25.dp)
-            )
+            Spacer(modifier = Modifier.height(25.dp))
         }
 
-
+        // Bottom decorative waves
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(120.dp)
                 .align(Alignment.BottomCenter)
         ) {
-
             val width = size.width
             val height = size.height
 
             val purplePath = Path().apply {
-
                 moveTo(0f, height * 0.30f)
-
                 cubicTo(
-                    width * 0.25f,
-                    height * 0.05f,
-                    width * 0.30f,
-                    height * 0.85f,
-                    width * 0.65f,
-                    height * 0.72f
+                    width * 0.25f, height * 0.05f,
+                    width * 0.30f, height * 0.85f,
+                    width * 0.65f, height * 0.72f
                 )
-
                 cubicTo(
-                    width * 0.82f,
-                    height * 0.65f,
-                    width * 0.90f,
-                    height * 0.40f,
-                    width,
-                    height * 0.52f
+                    width * 0.82f, height * 0.65f,
+                    width * 0.90f, height * 0.40f,
+                    width, height * 0.52f
                 )
-
                 lineTo(width, height)
                 lineTo(0f, height)
                 close()
@@ -640,27 +550,17 @@ fun LoginScreen(
             )
 
             val bluePath = Path().apply {
-
                 moveTo(0f, height * 0.62f)
-
                 cubicTo(
-                    width * 0.25f,
-                    height * 0.30f,
-                    width * 0.45f,
-                    height * 0.95f,
-                    width * 0.72f,
-                    height * 0.78f
+                    width * 0.25f, height * 0.30f,
+                    width * 0.45f, height * 0.95f,
+                    width * 0.72f, height * 0.78f
                 )
-
                 cubicTo(
-                    width * 0.86f,
-                    height * 0.70f,
-                    width * 0.94f,
-                    height * 0.70f,
-                    width,
-                    height * 0.80f
+                    width * 0.86f, height * 0.70f,
+                    width * 0.94f, height * 0.70f,
+                    width, height * 0.80f
                 )
-
                 lineTo(width, height)
                 lineTo(0f, height)
                 close()
@@ -671,10 +571,8 @@ fun LoginScreen(
                 color = ServexaBlue
             )
 
-
             for (row in 0..2) {
                 for (column in 0..2) {
-
                     drawCircle(
                         color = Color.White.copy(alpha = 0.25f),
                         radius = 3f,
@@ -688,9 +586,3 @@ fun LoginScreen(
         }
     }
 }
-
-//@Preview
-//@Composable
-//fun LoginScreenPreview() {
-//    LoginScreen()
-//}

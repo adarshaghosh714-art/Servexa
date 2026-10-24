@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -80,10 +81,10 @@ fun CustomerDashboardScreen(
     )
 
     Scaffold(
-        containerColor = ServexaBackground,
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             NavigationBar(
-                containerColor = Color.White
+                containerColor = MaterialTheme.colorScheme.surface
             ) {
                 NavigationBarItem(
                     selected = true,
@@ -203,7 +204,7 @@ fun CustomerDashboardScreen(
                             },
                         shape = RoundedCornerShape(18.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = Color.White
+                            containerColor = MaterialTheme.colorScheme.surface
                         ),
                         elevation = CardDefaults.cardElevation(
                             defaultElevation = 4.dp
@@ -222,13 +223,13 @@ fun CustomerDashboardScreen(
                                 modifier = Modifier
                                     .size(44.dp)
                                     .clip(CircleShape)
-                                    .background(ServexaLightPurple),
+                                    .background(MaterialTheme.colorScheme.surfaceVariant),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Handyman,
                                     contentDescription = null,
-                                    tint = ServexaPurple,
+                                    tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
@@ -245,7 +246,7 @@ fun CustomerDashboardScreen(
                                     fontSize = 16.sp,
                                     lineHeight = 22.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF222222),
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     maxLines = 1
                                 )
 
@@ -257,7 +258,7 @@ fun CustomerDashboardScreen(
                                     text = "Find the right professional for your problem",
                                     fontSize = 12.sp,
                                     lineHeight = 16.sp,
-                                    color = Color.Gray,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 2
                                 )
                             }
@@ -281,7 +282,7 @@ fun CustomerDashboardScreen(
                     fontSize = 20.sp,
                     lineHeight = 26.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF202020)
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
                 Spacer(
@@ -323,7 +324,7 @@ fun CustomerDashboardScreen(
                         fontSize = 20.sp,
                         lineHeight = 26.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF202020)
+                        color = MaterialTheme.colorScheme.onBackground
                     )
 
                     Text(
@@ -334,7 +335,7 @@ fun CustomerDashboardScreen(
                         fontSize = 13.sp,
                         lineHeight = 18.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = ServexaPurple
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
 
@@ -347,7 +348,7 @@ fun CustomerDashboardScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(18.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.surface
                     )
                 ) {
                     Column(
@@ -363,13 +364,13 @@ fun CustomerDashboardScreen(
                             modifier = Modifier
                                 .size(48.dp)
                                 .clip(CircleShape)
-                                .background(ServexaLightPurple),
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.AccessTime,
                                 contentDescription = null,
-                                tint = ServexaPurple,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(24.dp)
                             )
                         }
@@ -383,7 +384,8 @@ fun CustomerDashboardScreen(
                                 text = "No requests yet",
                                 fontSize = 15.sp,
                                 lineHeight = 21.sp,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
 
                             Spacer(
@@ -394,7 +396,7 @@ fun CustomerDashboardScreen(
                                 text = "Your service requests will appear here",
                                 fontSize = 12.sp,
                                 lineHeight = 17.sp,
-                                color = Color.Gray
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         } else {
                             recentJobs.forEach { job ->
@@ -437,7 +439,7 @@ private fun CustomerServiceCard(
             },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp
@@ -454,13 +456,13 @@ private fun CustomerServiceCard(
                 modifier = Modifier
                     .size(42.dp)
                     .clip(CircleShape)
-                    .background(ServexaLightPurple),
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = name,
-                    tint = ServexaPurple,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(22.dp)
                 )
             }
@@ -474,7 +476,7 @@ private fun CustomerServiceCard(
                 fontSize = 11.sp,
                 lineHeight = 15.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFF333333),
+                color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1
             )
         }

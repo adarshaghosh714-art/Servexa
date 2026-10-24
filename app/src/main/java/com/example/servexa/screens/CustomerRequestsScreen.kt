@@ -31,6 +31,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -82,7 +83,7 @@ fun CustomerRequestsScreen(
     }
 
     Scaffold(
-        containerColor = ServexaBackground,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {
@@ -117,7 +118,8 @@ fun CustomerRequestsScreen(
                     text = "Your Service Requests",
                     fontSize = 20.sp,
                     lineHeight = 27.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -126,7 +128,7 @@ fun CustomerRequestsScreen(
                     text = "Track the services you have requested",
                     fontSize = 13.sp,
                     lineHeight = 19.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -171,7 +173,7 @@ fun CustomerRequestCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp
@@ -192,13 +194,13 @@ fun CustomerRequestCard(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(CircleShape)
-                        .background(ServexaLightPurple),
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Work,
                         contentDescription = null,
-                        tint = ServexaPurple,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -212,7 +214,8 @@ fun CustomerRequestCard(
                         text = job.title,
                         fontSize = 16.sp,
                         lineHeight = 22.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Spacer(modifier = Modifier.height(3.dp))
@@ -221,7 +224,7 @@ fun CustomerRequestCard(
                         text = job.description,
                         fontSize = 13.sp,
                         lineHeight = 18.sp,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     Spacer(modifier = Modifier.height(3.dp))
@@ -232,7 +235,7 @@ fun CustomerRequestCard(
                         },
                         fontSize = 12.sp,
                         lineHeight = 17.sp,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
@@ -253,7 +256,7 @@ fun CustomerRequestCard(
                 Icon(
                     imageVector = Icons.Default.Person,
                     contentDescription = null,
-                    tint = Color.Gray,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp)
                 )
 
@@ -266,7 +269,7 @@ fun CustomerRequestCard(
                         text = "Service Provider",
                         fontSize = 11.sp,
                         lineHeight = 16.sp,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     Text(
@@ -275,7 +278,8 @@ fun CustomerRequestCard(
                         },
                         fontSize = 14.sp,
                         lineHeight = 20.sp,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -292,7 +296,7 @@ fun CustomerRequestCard(
                     modifier = Modifier.weight(1f),
                     fontSize = 13.sp,
                     lineHeight = 19.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Text(

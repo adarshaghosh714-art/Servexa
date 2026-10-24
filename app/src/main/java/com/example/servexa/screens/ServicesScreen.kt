@@ -30,6 +30,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
@@ -89,7 +90,7 @@ fun ServicesScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF7F7FC))
+            .background(MaterialTheme.colorScheme.background)
     ) {
 
         ServicesHeader()
@@ -107,7 +108,7 @@ fun ServicesScreen(
                 text = "Select your services",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF202124)
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(modifier = Modifier.height(6.dp))
@@ -115,7 +116,7 @@ fun ServicesScreen(
             Text(
                 text = "Choose all the services you provide.",
                 fontSize = 14.sp,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -149,7 +150,7 @@ fun ServicesScreen(
                     .height(55.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF5B5FEF)
+                    containerColor = MaterialTheme.colorScheme.primary
                 ),
                 enabled = selectedServices.isNotEmpty()
             ) {
@@ -244,9 +245,9 @@ fun ServiceOptionCard(
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (selected)
-                Color(0xFFE9E9FF)
+                MaterialTheme.colorScheme.surfaceVariant
             else
-                Color.White
+                MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp
@@ -266,9 +267,9 @@ fun ServiceOptionCard(
                     .clip(CircleShape)
                     .background(
                         if (selected)
-                            Color(0xFF5B5FEF)
+                            MaterialTheme.colorScheme.primary
                         else
-                            Color(0xFFEDEDF8)
+                            MaterialTheme.colorScheme.surfaceVariant
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -279,7 +280,7 @@ fun ServiceOptionCard(
                     tint = if (selected)
                         Color.White
                     else
-                        Color(0xFF5B5FEF)
+                        MaterialTheme.colorScheme.primary
                 )
             }
 
@@ -290,7 +291,7 @@ fun ServiceOptionCard(
                 modifier = Modifier.weight(1f),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFF202124)
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             if (selected) {
@@ -299,7 +300,7 @@ fun ServiceOptionCard(
                     modifier = Modifier
                         .size(28.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFF5B5FEF)),
+                        .background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center
                 ) {
 

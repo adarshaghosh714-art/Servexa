@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -31,12 +30,11 @@ import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Divider
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -44,38 +42,48 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.servexa.Setting.ThemeMode
+import com.example.servexa.Setting.ThemePreferences
+
 import com.example.servexa.viewModel.UserViewModel
+import com.example.servexa.ui.theme.ServexaTheme
+import kotlinx.coroutines.launch
 
-// ========================================================
-// COLORS
-// ========================================================
-
+// Brand accent colors stay consistent in both light and dark themes.
 private val ServexaPurple = Color(0xFF5B4AEF)
-private val ServexaPurpleSoft = Color(0xFFF1EFFF)
-
-private val ServexaBackground = Color(0xFFFFFFFF)
-private val ServexaText = Color(0xFF18181B)
-private val ServexaSecondaryText = Color(0xFF71717A)
-private val ServexaMutedText = Color(0xFFA1A1AA)
-private val ServexaDivider = Color(0xFFE4E4E7)
-
 private val ServexaGreen = Color(0xFF16A34A)
 private val ServexaGreenSoft = Color(0xFFDCFCE7)
 
-// ========================================================
-// PROFILE SCREEN
-// ========================================================
+@Composable
+private fun servexaBackground(): Color = MaterialTheme.colorScheme.background
+
+@Composable
+private fun servexaText(): Color = MaterialTheme.colorScheme.onBackground
+
+@Composable
+private fun servexaSecondaryText(): Color = MaterialTheme.colorScheme.onSurfaceVariant
+
+@Composable
+private fun servexaMutedText(): Color = MaterialTheme.colorScheme.outline
+
+@Composable
+private fun servexaDivider(): Color = MaterialTheme.colorScheme.outlineVariant
+
+@Composable
+private fun servexaPurpleSoft(): Color = MaterialTheme.colorScheme.secondaryContainer
 
 @Composable
 fun ProfileScreen(
@@ -88,9 +96,22 @@ fun ProfileScreen(
     val user by viewModel.user.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
 
+    // Theme preferences
+    val context = LocalContext.current
+    val themePreferences = remember(context) {
+        ThemePreferences(context)
+    }
+
+    val themeMode by themePreferences.themeMode
+        .collectAsStateWithLifecycle(initialValue = ThemeMode.SYSTEM)
+
+    val coroutineScope = rememberCoroutineScope()
+
     var isEditing by remember { mutableStateOf(false) }
     var editedName by remember { mutableStateOf("") }
-    var editedServices by remember { mutableStateOf<List<String>>(emptyList()) }
+    var editedServices by remember {
+        mutableStateOf<List<String>>(emptyList())
+    }
     var isSwitchingAccount by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -115,7 +136,7 @@ fun ProfileScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(ServexaBackground)
+            .background(servexaBackground())
     ) {
         ProfileTopHeader()
 
@@ -128,7 +149,6 @@ fun ProfileScreen(
         ) {
             Spacer(modifier = Modifier.height(32.dp))
 
-            // PROFILE IDENTITY
             ProfileIdentity(
                 name = user?.name?.ifBlank { "User" } ?: "User",
                 role = currentRole
@@ -167,7 +187,6 @@ fun ProfileScreen(
 
             ProfileDivider()
 
-            // The active account is displayed but cannot be edited here.
             ProfileDetailRow(
                 title = "Active account",
                 value = roleDisplayName(currentRole),
@@ -188,8 +207,26 @@ fun ProfileScreen(
                     onServicesChange = { editedServices = it }
                 )
             } else {
-                ServicesDisplay(services = user?.services.orEmpty())
+                ServicesDisplay(
+                    services = user?.services.orEmpty()
+                )
             }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // APPEARANCE / THEME SETTINGS
+            ProfileSectionLabel(text = "APPEARANCE")
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            AppearanceSection(
+                selectedMode = themeMode,
+                onModeSelected = { selectedMode ->
+                    coroutineScope.launch {
+                        themePreferences.setThemeMode(selectedMode)
+                    }
+                }
+            )
 
             Spacer(modifier = Modifier.height(42.dp))
 
@@ -209,7 +246,7 @@ fun ProfileScreen(
                     ) {
                         Text(
                             text = "Cancel",
-                            color = ServexaSecondaryText
+                            color = servexaSecondaryText()
                         )
                     }
 
@@ -278,7 +315,7 @@ fun ProfileScreen(
             Text(
                 text = "Switch between your Customer and Service Provider accounts.",
                 fontSize = 13.sp,
-                color = ServexaSecondaryText
+                color = servexaSecondaryText()
             )
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -300,7 +337,7 @@ fun ProfileScreen(
                     .height(52.dp),
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = ServexaPurpleSoft,
+                    containerColor = servexaPurpleSoft(),
                     contentColor = ServexaPurple
                 )
             ) {
@@ -336,9 +373,84 @@ fun ProfileScreen(
     }
 }
 
-// ========================================================
-// TOP HEADER
-// ========================================================
+
+
+@Composable
+private fun AppearanceSection(
+    selectedMode: ThemeMode,
+    onModeSelected: (ThemeMode) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(
+                width = 1.dp,
+                color = servexaDivider(),
+                shape = RoundedCornerShape(14.dp)
+            )
+            .padding(horizontal = 14.dp, vertical = 8.dp)
+    ) {
+        ThemeMode.values().forEachIndexed { index, mode ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable {
+                        onModeSelected(mode)
+                    }
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = when (mode) {
+                            ThemeMode.SYSTEM -> "System default"
+                            ThemeMode.LIGHT -> "Light"
+                            ThemeMode.DARK -> "Dark"
+                        },
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = servexaText()
+                    )
+
+                    Spacer(modifier = Modifier.height(3.dp))
+
+                    Text(
+                        text = when (mode) {
+                            ThemeMode.SYSTEM ->
+                                "Follow your device settings"
+
+                            ThemeMode.LIGHT ->
+                                "Always use light appearance"
+
+                            ThemeMode.DARK ->
+                                "Always use dark appearance"
+                        },
+                        fontSize = 12.sp,
+                        color = servexaSecondaryText()
+                    )
+                }
+
+                RadioButton(
+                    selected = selectedMode == mode,
+                    onClick = {
+                        onModeSelected(mode)
+                    }
+                )
+            }
+
+            if (index < ThemeMode.values().lastIndex) {
+                ProfileDivider()
+            }
+        }
+    }
+}
+
+
 
 @Composable
 private fun ProfileTopHeader() {
@@ -361,7 +473,7 @@ private fun ProfileTopHeader() {
             text = "Profile",
             fontSize = 30.sp,
             fontWeight = FontWeight.Bold,
-            color = ServexaText
+            color = servexaText()
         )
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -369,14 +481,12 @@ private fun ProfileTopHeader() {
         Text(
             text = "Manage your account and services",
             fontSize = 14.sp,
-            color = ServexaSecondaryText
+            color = servexaSecondaryText()
         )
     }
 }
 
-// ========================================================
-// PROFILE IDENTITY
-// ========================================================
+
 
 @Composable
 private fun ProfileIdentity(
@@ -390,7 +500,7 @@ private fun ProfileIdentity(
         Box(
             modifier = Modifier
                 .size(78.dp)
-                .background(ServexaPurpleSoft, CircleShape),
+                .background(servexaPurpleSoft(), CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -407,7 +517,7 @@ private fun ProfileIdentity(
             text = name,
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
-            color = ServexaText
+            color = servexaText()
         )
 
         Spacer(modifier = Modifier.height(5.dp))
@@ -415,7 +525,7 @@ private fun ProfileIdentity(
         Text(
             text = roleDisplayName(role),
             fontSize = 14.sp,
-            color = ServexaSecondaryText
+            color = servexaSecondaryText()
         )
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -445,9 +555,7 @@ private fun ProfileIdentity(
     }
 }
 
-// ========================================================
-// SECTION LABEL
-// ========================================================
+
 
 @Composable
 private fun ProfileSectionLabel(text: String) {
@@ -456,13 +564,11 @@ private fun ProfileSectionLabel(text: String) {
         fontSize = 11.sp,
         fontWeight = FontWeight.Bold,
         letterSpacing = 1.2.sp,
-        color = ServexaMutedText
+        color = servexaMutedText()
     )
 }
 
-// ========================================================
-// DETAIL ROW
-// ========================================================
+
 
 @Composable
 private fun ProfileDetailRow(
@@ -481,7 +587,7 @@ private fun ProfileDetailRow(
             modifier = Modifier
                 .size(36.dp)
                 .background(
-                    ServexaPurpleSoft,
+                    servexaPurpleSoft(),
                     RoundedCornerShape(9.dp)
                 ),
             contentAlignment = Alignment.Center
@@ -500,7 +606,7 @@ private fun ProfileDetailRow(
             Text(
                 text = title,
                 fontSize = 12.sp,
-                color = ServexaSecondaryText
+                color = servexaSecondaryText()
             )
 
             Spacer(modifier = Modifier.height(3.dp))
@@ -509,7 +615,7 @@ private fun ProfileDetailRow(
                 text = value,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = ServexaText
+                color = servexaText()
             )
         }
 
@@ -517,16 +623,13 @@ private fun ProfileDetailRow(
             Icon(
                 imageVector = Icons.Default.ArrowForwardIos,
                 contentDescription = null,
-                tint = ServexaMutedText,
+                tint = servexaMutedText(),
                 modifier = Modifier.size(14.dp)
             )
         }
     }
 }
 
-// ========================================================
-// DIVIDER
-// ========================================================
 
 @Composable
 private fun ProfileDivider() {
@@ -534,13 +637,11 @@ private fun ProfileDivider() {
         modifier = Modifier
             .fillMaxWidth()
             .height(1.dp)
-            .background(ServexaDivider)
+            .background(servexaDivider())
     )
 }
 
-// ========================================================
-// EDIT NAME
-// ========================================================
+
 
 @Composable
 private fun EditNameField(
@@ -562,16 +663,14 @@ private fun EditNameField(
         shape = RoundedCornerShape(10.dp),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = ServexaPurple,
-            unfocusedBorderColor = ServexaDivider,
+            unfocusedBorderColor = servexaDivider(),
             focusedLabelColor = ServexaPurple,
             cursorColor = ServexaPurple
         )
     )
 }
 
-// ========================================================
-// SERVICES DISPLAY
-// ========================================================
+
 
 @Composable
 private fun ServicesDisplay(services: List<String>) {
@@ -579,7 +678,7 @@ private fun ServicesDisplay(services: List<String>) {
         Text(
             text = "No services added yet.",
             fontSize = 14.sp,
-            color = ServexaSecondaryText
+            color = servexaSecondaryText()
         )
     } else {
         Column(
@@ -598,9 +697,7 @@ private fun ServicesDisplay(services: List<String>) {
     }
 }
 
-// ========================================================
-// SERVICE TAG
-// ========================================================
+
 
 @Composable
 private fun ServiceTag(service: String) {
@@ -609,7 +706,7 @@ private fun ServiceTag(service: String) {
             .clip(RoundedCornerShape(8.dp))
             .border(
                 width = 1.dp,
-                color = ServexaDivider,
+                color = servexaDivider(),
                 shape = RoundedCornerShape(8.dp)
             )
             .padding(horizontal = 11.dp, vertical = 8.dp),
@@ -628,14 +725,12 @@ private fun ServiceTag(service: String) {
             text = service,
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
-            color = ServexaText
+            color = servexaText()
         )
     }
 }
 
-// ========================================================
-// EDITABLE SERVICES
-// ========================================================
+
 
 @Composable
 private fun EditableServices(
@@ -675,8 +770,11 @@ private fun EditableServices(
                     onCheckedChange = { checked ->
                         onServicesChange(
                             if (checked) {
-                                if (selected) selectedServices
-                                else selectedServices + service
+                                if (selected) {
+                                    selectedServices
+                                } else {
+                                    selectedServices + service
+                                }
                             } else {
                                 selectedServices - service
                             }
@@ -689,16 +787,14 @@ private fun EditableServices(
                 Text(
                     text = service,
                     fontSize = 14.sp,
-                    color = ServexaText
+                    color = servexaText()
                 )
             }
         }
     }
 }
 
-// ========================================================
-// ROLE DISPLAY
-// ========================================================
+
 
 private fun roleDisplayName(role: String): String {
     return when (role) {
@@ -708,9 +804,7 @@ private fun roleDisplayName(role: String): String {
     }
 }
 
-// ========================================================
-// BOTTOM NAVIGATION
-// ========================================================
+
 
 @Composable
 private fun ProfileBottomBar(
@@ -721,8 +815,8 @@ private fun ProfileBottomBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
-            .border(width = 1.dp, color = ServexaDivider)
+            .background(MaterialTheme.colorScheme.surface)
+            .border(width = 1.dp, color = servexaDivider())
             .navigationBarsPadding()
             .padding(horizontal = 40.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -769,7 +863,7 @@ private fun ProfileBottomItem(
             imageVector = icon,
             contentDescription = label,
             tint = if (selected) ServexaPurple
-            else ServexaSecondaryText,
+            else servexaSecondaryText(),
             modifier = Modifier.size(20.dp)
         )
 
@@ -781,14 +875,12 @@ private fun ProfileBottomItem(
             fontWeight = if (selected) FontWeight.Bold
             else FontWeight.Medium,
             color = if (selected) ServexaPurple
-            else ServexaSecondaryText
+            else servexaSecondaryText()
         )
     }
 }
 
-// ========================================================
-// PREVIEW
-// ========================================================
+
 
 @Preview(
     showBackground = true,
@@ -797,128 +889,143 @@ private fun ProfileBottomItem(
 )
 @Composable
 fun ProfileScreenPreview() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ) {
-        ProfileTopHeader()
-
+    ServexaTheme {
         Column(
             modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 28.dp)
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
+            ProfileTopHeader()
 
-            ProfileIdentity(
-                name = "Adarsh Ghosh",
-                role = "SERVICE_PROVIDER"
-            )
-
-            Spacer(modifier = Modifier.height(46.dp))
-
-            ProfileSectionLabel(text = "ACCOUNT")
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            ProfileDetailRow(
-                title = "Personal information",
-                value = "Adarsh Ghosh",
-                icon = Icons.Default.Person,
-                showArrow = false
-            )
-
-            ProfileDivider()
-
-            ProfileDetailRow(
-                title = "Email address",
-                value = "adarsh@example.com",
-                icon = Icons.Default.Email,
-                showArrow = false
-            )
-
-            ProfileDivider()
-
-            ProfileDetailRow(
-                title = "Active account",
-                value = "Service Provider",
-                icon = Icons.Default.Work,
-                showArrow = false
-            )
-
-            Spacer(modifier = Modifier.height(46.dp))
-
-            ProfileSectionLabel(text = "YOUR SERVICES")
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            ServicesDisplay(
-                services = listOf(
-                    "Electrician",
-                    "AC Technician",
-                    "Appliance Repair"
-                )
-            )
-
-            Spacer(modifier = Modifier.height(42.dp))
-
-            Button(
-                onClick = {},
+            Column(
                 modifier = Modifier
+                    .weight(1f)
                     .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = ServexaPurple
-                )
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 28.dp)
             ) {
-                Text(
-                    text = "Edit profile",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
+                Spacer(modifier = Modifier.height(32.dp))
+
+                ProfileIdentity(
+                    name = "Adarsh Ghosh",
+                    role = "SERVICE_PROVIDER"
                 )
+
+                Spacer(modifier = Modifier.height(46.dp))
+
+                ProfileSectionLabel(text = "ACCOUNT")
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                ProfileDetailRow(
+                    title = "Personal information",
+                    value = "Adarsh Ghosh",
+                    icon = Icons.Default.Person,
+                    showArrow = false
+                )
+
+                ProfileDivider()
+
+                ProfileDetailRow(
+                    title = "Email address",
+                    value = "adarsh@example.com",
+                    icon = Icons.Default.Email,
+                    showArrow = false
+                )
+
+                ProfileDivider()
+
+                ProfileDetailRow(
+                    title = "Active account",
+                    value = "Service Provider",
+                    icon = Icons.Default.Work,
+                    showArrow = false
+                )
+
+                Spacer(modifier = Modifier.height(46.dp))
+
+                ProfileSectionLabel(text = "YOUR SERVICES")
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                ServicesDisplay(
+                    services = listOf(
+                        "Electrician",
+                        "AC Technician",
+                        "Appliance Repair"
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                ProfileSectionLabel(text = "APPEARANCE")
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                AppearanceSection(
+                    selectedMode = ThemeMode.SYSTEM,
+                    onModeSelected = {}
+                )
+
+                Spacer(modifier = Modifier.height(42.dp))
+
+                Button(
+                    onClick = {},
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ServexaPurple
+                    )
+                ) {
+                    Text(
+                        text = "Edit profile",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                ProfileSectionLabel(text = "SWITCH ACCOUNT")
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Text(
+                    text = "Switch between your Customer and Service Provider accounts.",
+                    fontSize = 13.sp,
+                    color = servexaSecondaryText()
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Button(
+                    onClick = {},
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = servexaPurpleSoft(),
+                        contentColor = ServexaPurple
+                    )
+                ) {
+                    Text(
+                        text = "Switch to Customer",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-            ProfileSectionLabel(text = "SWITCH ACCOUNT")
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Text(
-                text = "Switch between your Customer and Service Provider accounts.",
-                fontSize = 13.sp,
-                color = ServexaSecondaryText
+            ProfileBottomBar(
+                onHomeClick = {},
+                onJobsClick = {},
+                onProfileClick = {}
             )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Button(
-                onClick = {},
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = ServexaPurpleSoft,
-                    contentColor = ServexaPurple
-                )
-            ) {
-                Text(
-                    text = "Switch to Customer",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
         }
-
-        ProfileBottomBar(
-            onHomeClick = {},
-            onJobsClick = {},
-            onProfileClick = {}
-        )
     }
 }

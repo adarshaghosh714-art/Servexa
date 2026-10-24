@@ -36,7 +36,7 @@ class JobViewModel(private val repository: JobRepository) : ViewModel() {
         }
     }
 
-    fun addJob(job: Job) {
+    fun addJob(job: Job, onSuccess: () -> Unit = {}) {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
@@ -45,7 +45,7 @@ class JobViewModel(private val repository: JobRepository) : ViewModel() {
 
             result.onSuccess {
                 _isLoading.value = false
-
+                onSuccess()
             }
             result.onFailure { exception ->
                 _errorMessage.value = exception.message ?: "Failed to add the job"
