@@ -2,6 +2,7 @@ package com.example.servexa.repository
 
 import com.example.servexa.model.User
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
@@ -46,6 +47,38 @@ class UserRepository {
             Result.failure(e)
         }
     }
+
+
+    suspend fun switchAccountRole(newRole: String): Result<Unit> {
+        return try {
+            require(
+                newRole == "CUSTOMER" ||
+                        newRole == "SERVICE_PROVIDER"
+            ) {
+                "Invalid account type"
+            }
+
+            val currentUser = FirebaseAuth.getInstance().currentUser
+                ?: return Result.failure(
+                    Exception("User is not logged in")
+                )
+
+            firestore.collection("users")
+                .document(currentUser.uid)
+                .update(
+                    mapOf(
+                        "currentRole" to newRole,
+                        "roles" to FieldValue.arrayUnion(newRole)
+                    )
+                )
+                .await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 
     suspend fun getCurrentUser(): User? {
         val firebaseUser = FirebaseAuth.getInstance().currentUser ?: return null

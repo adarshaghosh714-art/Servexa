@@ -12,5 +12,8 @@ data class Job(
     val description: String="",
     val status: String="Pending",
     val price: Double=0.0,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val customerApprovedProvider: Boolean = false,
+    val customerCompleted: Boolean = false,
+    val providerCompleted: Boolean = false
 )

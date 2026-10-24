@@ -1,3 +1,4 @@
+
 package com.example.servexa.screens
 
 import androidx.compose.foundation.background
@@ -17,24 +18,24 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Work
+import androidx.compose.material.icons.filled.WorkOutline
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -47,44 +48,65 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.servexa.model.Job
 import com.example.servexa.viewModel.JobViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+private val ServexaPrimary = Color(0xFF5B5FEF)
+private val ServexaInk = Color(0xFF202744)
+private val ServexaMuted = Color(0xFF858BA0)
+private val ServexaBackground = Color(0xFFF7F8FC)
+private val ServexaBorder = Color(0xFFE9EBF3)
+private val ServexaPurpleLight = Color(0xFFEEEEFF)
+private val ServexaGreen = Color(0xFF168653)
+private val ServexaGreenLight = Color(0xFFE7F7EF)
+private val ServexaOrange = Color(0xFFB86B0B)
+private val ServexaOrangeLight = Color(0xFFFFF2DE)
+private val ServexaRed = Color(0xFFBD4141)
+private val ServexaRedLight = Color(0xFFFFEEEE)
+private val ServexaPurple = Color(0xFF7657F5)
+private val ServexaSecondaryText = Color(0xFF71717A)
+
 @Composable
 fun JobsScreen(
     viewModel: JobViewModel,
-
     onJobClick: (Job) -> Unit = {},
     onHomeClick: () -> Unit = {},
     onJobsClick: () -> Unit = {},
-    onProfileClick: () -> Unit = {}
+    onProfileClick: () -> Unit = {},
+    onChatClick: (Job) -> Unit = {}
 ) {
+    var searchText by remember { mutableStateOf("") }
 
-    var searchText by remember {
-        mutableStateOf("")
-    }
     val jobs by viewModel.jobs.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
-
-    val filteredJobs = jobs.filter {
-        it.title.contains(searchText, ignoreCase = true) ||
-                it.customerName.contains(searchText, ignoreCase = true)
-    }
     LaunchedEffect(Unit) {
         viewModel.getJobs()
     }
 
-    Scaffold(
+    val filteredJobs = jobs.filter { job ->
+        job.title.contains(searchText, ignoreCase = true) ||
+                job.customerName.contains(searchText, ignoreCase = true) ||
+                job.description.contains(searchText, ignoreCase = true) ||
+                job.status.contains(searchText, ignoreCase = true)
+    }
 
+    val pendingCount = jobs.count {
+        it.status.equals("Pending", ignoreCase = true)
+    }
+
+    val acceptedCount = jobs.count {
+        it.status.equals("Accepted", ignoreCase = true)
+    }
+
+    Scaffold(
+        containerColor = ServexaBackground,
         bottomBar = {
             JobsBottomBar(
                 onHomeClick = onHomeClick,
@@ -94,294 +116,490 @@ fun JobsScreen(
         }
     ) { paddingValues ->
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(Color(0xFFF7F7FC)),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-
-            item {
-
-                JobsHeader(
-                    jobCount = jobs.size
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(
-                    value = searchText,
-                    onValueChange = {
-                        searchText = it
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                    placeholder = {
-                        Text("Search jobs...")
-                    },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Search"
-                        )
-                    },
-                    singleLine = true,
-                    shape = RoundedCornerShape(16.dp)
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
-            if (isLoading) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(40.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-            } else if (errorMessage != null) {
-                item {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(text = "Something went wrong")
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = errorMessage ?: "Failed to load Jobs")
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = {
-                        viewModel.clearError()
-                        viewModel.getJobs()
-                    }) {
-                        Text("Retry")
-                    }
-
-                }
-            } else if (filteredJobs.isEmpty()) {
-                item {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(40.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = if (searchText.isEmpty()) {
-                                "No jobs yet"
-                            } else {
-                                "No jobs found"
-                            }
-                        )
-                    }
-                }
-            } else {
-
-                items(filteredJobs) { job ->
-
-                    JobCard(
-
-                        job = job,
-
-                        onClick = {
-                            onJobClick(job)
-                        }
-                    )
-                }
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(80.dp))
-            }
-        }
-    }
-}
-
-
-@Composable
-fun JobsHeader(
-    jobCount: Int
-) {
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(190.dp)
-            .clip(
-                RoundedCornerShape(
-                    bottomStart = 32.dp,
-                    bottomEnd = 32.dp
-                )
-            )
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFF5B5FEF),
-                        Color(0xFF7B4DFF)
-                    )
-                )
-            )
-    ) {
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(
-                    horizontal = 24.dp,
-                    vertical = 28.dp
-                ),
-            verticalArrangement = Arrangement.Center
+                .padding(paddingValues)
+                .background(ServexaBackground)
         ) {
+            JobsTopHeader(
+                jobCount = jobs.size,
+                pendingCount = pendingCount,
+                acceptedCount = acceptedCount
+            )
+
+            OutlinedTextField(
+                value = searchText,
+                onValueChange = { searchText = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 18.dp),
+                placeholder = {
+                    Text(
+                        text = "Search jobs, customers...",
+                        color = ServexaMuted,
+                        fontSize = 14.sp
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search jobs",
+                        tint = ServexaMuted
+                    )
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(15.dp),
+                colors = androidx.compose.material3.TextFieldDefaults.colors(
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
+                    focusedIndicatorColor = ServexaPrimary,
+                    unfocusedIndicatorColor = ServexaBorder,
+                    cursorColor = ServexaPrimary
+                )
+            )
 
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 22.dp)
+                    .padding(bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                Text(
+                    text = if (searchText.isBlank()) "Your jobs" else "Search results",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = ServexaInk
+                )
 
-                Box(
-                    modifier = Modifier
-                        .size(52.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.2f)),
-                    contentAlignment = Alignment.Center
-                ) {
+                Text(
+                    text = "${filteredJobs.size} found",
+                    fontSize = 13.sp,
+                    color = ServexaMuted
+                )
+            }
 
-                    Icon(
-                        imageVector = Icons.Default.Work,
-                        contentDescription = "Jobs",
-                        tint = Color.White,
-                        modifier = Modifier.size(28.dp)
+            when {
+                isLoading -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = ServexaPrimary
+                        )
+                    }
+                }
+
+                errorMessage != null -> {
+                    MessageState(
+                        title = "Couldn't load your jobs",
+                        message = errorMessage ?: "Please try again.",
+                        actionLabel = "Try again",
+                        onAction = {
+                            viewModel.clearError()
+                            viewModel.getJobs()
+                        }
                     )
                 }
 
-                Spacer(modifier = Modifier.width(14.dp))
-
-                Column {
-
-                    Text(
-                        text = "My Jobs",
-                        color = Color.White,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold
+                filteredJobs.isEmpty() -> {
+                    MessageState(
+                        title = if (searchText.isBlank()) {
+                            "No jobs to show"
+                        } else {
+                            "No matching jobs"
+                        },
+                        message = if (searchText.isBlank()) {
+                            "Jobs assigned to your account will appear here."
+                        } else {
+                            "Try another job title, customer name, or status."
+                        },
+                        actionLabel = if (searchText.isNotBlank()) {
+                            "Clear search"
+                        } else {
+                            null
+                        },
+                        onAction = {
+                            searchText = ""
+                        }
                     )
+                }
 
-                    Text(
-                        text = "$jobCount jobs available",
-                        color = Color.White.copy(alpha = 0.8f),
-                        fontSize = 14.sp
-                    )
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                            start = 20.dp,
+                            end = 20.dp,
+                            top = 2.dp,
+                            bottom = 24.dp
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        items(
+                            items = filteredJobs,
+                            key = { job -> job.id }
+                        ) { job ->
+                            JobCard(
+                                job = job,
+                                onClick = { onJobClick(job) },
+                                onAccept = {
+                                    viewModel.updateJobStatus(
+                                        job.id,
+                                        "Accepted"
+                                    )
+                                },
+                                onReject = {
+                                    viewModel.updateJobStatus(
+                                        job.id,
+                                        "Rejected"
+                                    )
+                                },
+                                onComplete = {
+                                    viewModel.markJobCompleted(
+                                        jobId = job.id,
+                                        isCustomer = false
+                                    )
+                                },
+                                onChatClick = {
+                                    onChatClick(job)
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
     }
 }
 
+@Composable
+private fun JobsTopHeader(
+    jobCount: Int,
+    pendingCount: Int,
+    acceptedCount: Int
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .padding(
+                start = 22.dp,
+                end = 22.dp,
+                top = 24.dp,
+                bottom = 20.dp
+            )
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Work overview",
+                    fontSize = 13.sp,
+                    color = ServexaMuted
+                )
+
+                Spacer(modifier = Modifier.height(5.dp))
+
+                Text(
+                    text = "My Jobs",
+                    fontSize = 29.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = ServexaInk
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(ServexaPurpleLight),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.WorkOutline,
+                    contentDescription = "My jobs",
+                    tint = ServexaPrimary,
+                    modifier = Modifier.size(25.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(22.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            SummaryItem(
+                modifier = Modifier.weight(1f),
+                label = "Total jobs",
+                value = jobCount.toString(),
+                accent = ServexaPrimary
+            )
+
+            SummaryItem(
+                modifier = Modifier.weight(1f),
+                label = "Pending",
+                value = pendingCount.toString(),
+                accent = ServexaOrange
+            )
+
+            SummaryItem(
+                modifier = Modifier.weight(1f),
+                label = "Accepted",
+                value = acceptedCount.toString(),
+                accent = ServexaGreen
+            )
+        }
+    }
+}
+
+@Composable
+private fun SummaryItem(
+    modifier: Modifier = Modifier,
+    label: String,
+    value: String,
+    accent: Color
+) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(15.dp))
+            .background(ServexaBackground)
+            .padding(horizontal = 12.dp, vertical = 13.dp)
+    ) {
+        Text(
+            text = value,
+            fontSize = 23.sp,
+            fontWeight = FontWeight.Bold,
+            color = accent
+        )
+
+        Spacer(modifier = Modifier.height(3.dp))
+
+        Text(
+            text = label,
+            fontSize = 11.sp,
+            color = ServexaMuted,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
 
 @Composable
 fun JobCard(
     job: Job,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onAccept: () -> Unit,
+    onReject: () -> Unit,
+    onComplete: () -> Unit,
+    onChatClick: () -> Unit = {}
 ) {
+    val status = job.status
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp),
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 3.dp
-        ),
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(19.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 0.dp
+        ),
         onClick = onClick
     ) {
-
         Column(
-            modifier = Modifier.padding(18.dp)
+            modifier = Modifier.padding(17.dp)
         ) {
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
+                Box(
+                    modifier = Modifier
+                        .size(45.dp)
+                        .clip(RoundedCornerShape(13.dp))
+                        .background(ServexaPurpleLight),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Build,
+                        contentDescription = "Service",
+                        tint = ServexaPrimary,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
 
                 Column(
                     modifier = Modifier.weight(1f)
                 ) {
-
                     Text(
-                        text = job.title,
-                        fontSize = 19.sp,
+                        text = job.title.ifBlank { "Service request" },
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF202124)
+                        color = ServexaInk,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
 
-                    Spacer(modifier = Modifier.height(5.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
-                        text = job.customerName,
-                        fontSize = 14.sp,
-                        color = Color.Gray
+                        text = "Customer: ${job.customerName.ifBlank { "Customer" }}",
+                        fontSize = 12.sp,
+                        color = ServexaMuted,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
-                JobStatusBadge(
-                    status = job.status
-                )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                JobStatusBadge(status = status)
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = job.description,
-                fontSize = 14.sp,
-                color = Color(0xFF666666)
+                text = job.description.ifBlank {
+                    "No description provided."
+                },
+                fontSize = 13.sp,
+                lineHeight = 19.sp,
+                color = Color(0xFF656B7E),
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            HorizontalDivider(color = ServexaBorder)
+
+            Spacer(modifier = Modifier.height(13.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                Column {
+                    Text(
+                        text = "Estimated price",
+                        fontSize = 11.sp,
+                        color = ServexaMuted
+                    )
 
-                Text(
-                    text = "₹${job.price.toInt()}",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF5B5FEF)
-                )
+                    Spacer(modifier = Modifier.height(3.dp))
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    Text(
+                        text = "₹${"%.0f".format(java.util.Locale("en", "IN"), job.price)}",
+                        fontSize = 21.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = ServexaInk
+                    )
+                }
+
+                TextButton(
+                    onClick = onClick
                 ) {
+                    Text(
+                        text = "Details",
+                        color = ServexaPrimary,
+                        fontWeight = FontWeight.SemiBold
+                    )
 
-                    TextButton(
-                        onClick = onClick
+                    Spacer(modifier = Modifier.width(3.dp))
+
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = "View details",
+                        tint = ServexaPrimary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
+            when {
+                status.equals("Pending", ignoreCase = true) -> {
+                    Spacer(modifier = Modifier.height(13.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
+                        Button(
+                            onClick = onAccept,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = ServexaPrimary
+                            )
+                        ) {
+                            Text("Accept job")
+                        }
 
-                        Text(
-                            text = "View",
-                            color = Color(0xFF5B5FEF),
-                            fontWeight = FontWeight.Bold
-                        )
+                        Button(
+                            onClick = onReject,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = ServexaRedLight,
+                                contentColor = ServexaRed
+                            )
+                        ) {
+                            Text("Decline")
+                        }
+                    }
+                }
 
-                        Icon(
-                            imageVector = Icons.Default.ArrowForward,
-                            contentDescription = "View Job",
-                            tint = Color(0xFF5B5FEF),
-                            modifier = Modifier.size(18.dp)
-                        )
+                status.equals("Accepted", ignoreCase = true) -> {
+                    Spacer(modifier = Modifier.height(13.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Button(
+                            onClick = onChatClick,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = ServexaPurpleLight,
+                                contentColor = ServexaPrimary
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Chat,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+
+                            Spacer(modifier = Modifier.width(7.dp))
+
+                            Text("Message")
+                        }
+
+                        Button(
+                            onClick = onComplete,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = ServexaPrimary
+                            )
+                        ) {
+                            Text("Complete job")
+                        }
                     }
                 }
             }
@@ -389,43 +607,102 @@ fun JobCard(
     }
 }
 
-
 @Composable
-fun JobStatusBadge(
-    status: String
-) {
+fun JobStatusBadge(status: String) {
+    val (label, background, foreground) = when {
+        status.equals("Completed", ignoreCase = true) ->
+            Triple("Completed", ServexaGreenLight, ServexaGreen)
 
-    val backgroundColor = when (status) {
-        "Completed" -> Color(0xFFE5F8EC)
-        "In Progress" -> Color(0xFFFFF1D6)
-        else -> Color(0xFFE8E9FF)
+        status.equals("Accepted", ignoreCase = true) ->
+            Triple("Accepted", ServexaPurpleLight, ServexaPrimary)
+
+        status.equals("Rejected", ignoreCase = true) ->
+            Triple("Declined", ServexaRedLight, ServexaRed)
+
+        else ->
+            Triple("Pending", ServexaOrangeLight, ServexaOrange)
     }
 
-    val textColor = when (status) {
-        "Completed" -> Color(0xFF1B8A4B)
-        "In Progress" -> Color(0xFFD38300)
-        else -> Color(0xFF5558C9)
-    }
-
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(backgroundColor)
-            .padding(
-                horizontal = 12.dp,
-                vertical = 6.dp
-            )
+    Surface(
+        shape = RoundedCornerShape(8.dp),
+        color = background
     ) {
-
         Text(
-            text = status,
-            color = textColor,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold
+            text = label,
+            modifier = Modifier.padding(
+                horizontal = 9.dp,
+                vertical = 6.dp
+            ),
+            color = foreground,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1
         )
     }
 }
 
+@Composable
+private fun MessageState(
+    title: String,
+    message: String,
+    actionLabel: String?,
+    onAction: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                horizontal = 30.dp,
+                vertical = 42.dp
+            ),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(64.dp)
+                .clip(CircleShape)
+                .background(ServexaPurpleLight),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.WorkOutline,
+                contentDescription = null,
+                tint = ServexaPrimary,
+                modifier = Modifier.size(29.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        Text(
+            text = title,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = ServexaInk
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = message,
+            fontSize = 13.sp,
+            lineHeight = 19.sp,
+            color = ServexaMuted
+        )
+
+        if (actionLabel != null) {
+            Spacer(modifier = Modifier.height(14.dp))
+
+            TextButton(onClick = onAction) {
+                Text(
+                    text = actionLabel,
+                    color = ServexaPrimary,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
 
 @Composable
 fun JobsBottomBar(
@@ -433,39 +710,43 @@ fun JobsBottomBar(
     onJobsClick: () -> Unit,
     onProfileClick: () -> Unit
 ) {
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .padding(vertical = 10.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically
+    Surface(
+        color = Color.White,
+        shadowElevation = 8.dp
     ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = 28.dp,
+                    vertical = 12.dp
+                ),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            JobsBottomItem(
+                icon = Icons.Default.Home,
+                label = "Home",
+                selected = false,
+                onClick = onHomeClick
+            )
 
-        JobsBottomItem(
-            icon = Icons.Default.Home,
-            label = "Home",
-            selected = false,
-            onClick = onHomeClick
-        )
+            JobsBottomItem(
+                icon = Icons.Default.WorkOutline,
+                label = "Jobs",
+                selected = true,
+                onClick = onJobsClick
+            )
 
-        JobsBottomItem(
-            icon = Icons.Default.Build,
-            label = "Jobs",
-            selected = true,
-            onClick = onJobsClick
-        )
-
-        JobsBottomItem(
-            icon = Icons.Default.Person,
-            label = "Profile",
-            selected = false,
-            onClick = onProfileClick
-        )
+            JobsBottomItem(
+                icon = Icons.Default.Person,
+                label = "Profile",
+                selected = false,
+                onClick = onProfileClick
+            )
+        }
     }
 }
-
 
 @Composable
 fun JobsBottomItem(
@@ -474,53 +755,63 @@ fun JobsBottomItem(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    val tint = if (selected) ServexaPrimary else ServexaMuted
 
     Column(
         modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(
-                if (selected)
-                    Color(0xFFE9E9FF)
-                else
-                    Color.Transparent
-            )
-            .padding(
-                horizontal = 20.dp,
-                vertical = 6.dp
+            .clip(
+                RoundedCornerShape(10.dp)
             )
             .clickable {
                 onClick()
-            },
-        horizontalAlignment = Alignment.CenterHorizontally
+            }
+            .padding(
+                horizontal = 12.dp,
+                vertical = 5.dp
+            ),
+
+        horizontalAlignment =
+            Alignment.CenterHorizontally
     ) {
 
         Icon(
             imageVector = icon,
             contentDescription = label,
-            tint = if (selected)
-                Color(0xFF5B5FEF)
-            else
-                Color.Gray
+
+            tint =
+                if (selected) {
+                    ServexaPurple
+                } else {
+                    ServexaSecondaryText
+                },
+
+            modifier = Modifier.size(20.dp)
         )
+
+
+        Spacer(
+            modifier = Modifier.height(3.dp)
+        )
+
 
         Text(
             text = label,
-            fontSize = 12.sp,
-            color = if (selected)
-                Color(0xFF5B5FEF)
-            else
-                Color.Gray
+
+            fontSize = 10.sp,
+
+            fontWeight =
+                if (selected) {
+                    FontWeight.Bold
+                } else {
+                    FontWeight.Medium
+                },
+
+            color =
+                if (selected) {
+                    ServexaPurple
+                } else {
+                    ServexaSecondaryText
+                }
         )
     }
 }
-
-
-//@Preview(
-//    showBackground = true,
-//    showSystemUi = true
-//)
-//@Composable
-//fun JobsScreenPreview() {
-//
-//    JobsScreen(viewModel = JobViewModel)
-//}

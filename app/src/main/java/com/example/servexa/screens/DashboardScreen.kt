@@ -1,3 +1,4 @@
+
 package com.example.servexa.screens
 
 import androidx.compose.foundation.background
@@ -20,11 +21,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SegmentedButtonDefaults.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,13 +39,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.servexa.viewModel.AuthViewModel
+import com.example.servexa.model.Job
+import com.example.servexa.viewModel.JobViewModel
 import com.example.servexa.viewModel.UserViewModel
 
 private val ServexaBlue = Color(0xFF315FEA)
@@ -51,7 +55,7 @@ private val ServexaLightPurple = Color(0xFFE9E7FF)
 private val ServexaOrange = Color(0xFFFF941F)
 private val ServexaYellow = Color(0xFFFFB52E)
 private val ServexaBackground = Color(0xFFF8F9FF)
-
+private val ServexaSecondaryText = Color(0xFF71717A)
 
 // ======================================================
 // DASHBOARD SCREEN
@@ -60,18 +64,28 @@ private val ServexaBackground = Color(0xFFF8F9FF)
 @Composable
 fun DashboardScreen(
     viewModel: UserViewModel,
+    jobViewModel: JobViewModel,
     onHomeClick: () -> Unit,
     onJobsClick: () -> Unit,
     onProfileClick: () -> Unit,
+    onMessageClick: () -> Unit
 ) {
-
     val user by viewModel.user.collectAsStateWithLifecycle()
+    val jobs by jobViewModel.jobs.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.getCurrentUser()
+        jobViewModel.getJobs()
     }
-    LaunchedEffect(Unit) {
-        viewModel.getCurrentUser()
+
+    val totalJobs = jobs.size
+
+    val pendingJobs = jobs.count {
+        it.status.equals("Pending", ignoreCase = true)
+    }
+
+    val completedJobs = jobs.count {
+        it.status.equals("Completed", ignoreCase = true)
     }
 
     Box(
@@ -79,7 +93,6 @@ fun DashboardScreen(
             .fillMaxSize()
             .background(ServexaBackground)
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -95,14 +108,14 @@ fun DashboardScreen(
                     .padding(horizontal = 22.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-
                 item {
+                    Spacer(modifier = Modifier.height(4.dp))
 
-                    Spacer(
-                        modifier = Modifier.height(4.dp)
+                    OverviewCard(
+                        totalJobs = totalJobs,
+                        pendingJobs = pendingJobs,
+                        completedJobs = completedJobs
                     )
-
-                    OverviewCard()
                 }
 
                 item {
@@ -110,26 +123,23 @@ fun DashboardScreen(
                 }
 
                 item {
-                    RecentJobs()
+                    RecentJobs(jobs = jobs)
                 }
 
                 item {
-
-                    Spacer(
-                        modifier = Modifier.height(10.dp)
-                    )
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
             }
 
             DashboardBottomBar(
                 onHomeClick = onHomeClick,
                 onJobsClick = onJobsClick,
-                onProfileClick = onProfileClick
+                onProfileClick = onProfileClick,
+                onMessageClick = onMessageClick
             )
         }
     }
 }
-
 
 // ======================================================
 // DASHBOARD HEADER
@@ -139,7 +149,6 @@ fun DashboardScreen(
 fun DashboardHeader(
     userName: String
 ) {
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -151,11 +160,9 @@ fun DashboardHeader(
             ),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
         Column(
             modifier = Modifier.weight(1f)
         ) {
-
             Text(
                 text = "Good morning, $userName 👋",
                 fontSize = 26.sp,
@@ -163,9 +170,7 @@ fun DashboardHeader(
                 color = ServexaDarkBlue
             )
 
-            Spacer(
-                modifier = Modifier.height(4.dp)
-            )
+            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = "Here's your Servexa overview",
@@ -177,10 +182,7 @@ fun DashboardHeader(
         Box(
             modifier = Modifier
                 .size(52.dp)
-                .shadow(
-                    elevation = 6.dp,
-                    shape = CircleShape
-                )
+                .shadow(6.dp, CircleShape)
                 .clip(CircleShape)
                 .background(
                     Brush.linearGradient(
@@ -192,9 +194,10 @@ fun DashboardHeader(
                 ),
             contentAlignment = Alignment.Center
         ) {
-
             Text(
-                text = "S",
+                text = userName.firstOrNull()
+                    ?.uppercaseChar()
+                    ?.toString() ?: "U",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.White
@@ -203,14 +206,16 @@ fun DashboardHeader(
     }
 }
 
-
 // ======================================================
 // OVERVIEW CARD
 // ======================================================
 
 @Composable
-fun OverviewCard() {
-
+fun OverviewCard(
+    totalJobs: Int,
+    pendingJobs: Int,
+    completedJobs: Int
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -229,9 +234,7 @@ fun OverviewCard() {
             )
             .padding(22.dp)
     ) {
-
         Column {
-
             Text(
                 text = "TODAY'S OVERVIEW",
                 fontSize = 12.sp,
@@ -240,34 +243,30 @@ fun OverviewCard() {
                 color = Color.White.copy(alpha = 0.75f)
             )
 
-            Spacer(
-                modifier = Modifier.height(18.dp)
-            )
+            Spacer(modifier = Modifier.height(18.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-
                 DashboardStat(
-                    number = "08",
+                    number = totalJobs.toString().padStart(2, '0'),
                     label = "Total Jobs"
                 )
 
                 DashboardStat(
-                    number = "03",
+                    number = pendingJobs.toString().padStart(2, '0'),
                     label = "Pending"
                 )
 
                 DashboardStat(
-                    number = "05",
+                    number = completedJobs.toString().padStart(2, '0'),
                     label = "Completed"
                 )
             }
         }
     }
 }
-
 
 // ======================================================
 // DASHBOARD STAT
@@ -278,9 +277,7 @@ fun DashboardStat(
     number: String,
     label: String
 ) {
-
     Column {
-
         Text(
             text = number,
             fontSize = 30.sp,
@@ -296,16 +293,13 @@ fun DashboardStat(
     }
 }
 
-
 // ======================================================
 // QUICK ACTIONS
 // ======================================================
 
 @Composable
 fun QuickActions() {
-
     Column {
-
         Text(
             text = "Quick Actions",
             fontSize = 20.sp,
@@ -313,15 +307,12 @@ fun QuickActions() {
             color = ServexaDarkBlue
         )
 
-        Spacer(
-            modifier = Modifier.height(12.dp)
-        )
+        Spacer(modifier = Modifier.height(12.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-
             ActionCard(
                 modifier = Modifier.weight(1f),
                 icon = Icons.Default.Add,
@@ -337,7 +328,6 @@ fun QuickActions() {
     }
 }
 
-
 // ======================================================
 // ACTION CARD
 // ======================================================
@@ -345,21 +335,21 @@ fun QuickActions() {
 @Composable
 fun ActionCard(
     modifier: Modifier,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     title: String
 ) {
-
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(20.dp)
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        )
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(18.dp)
         ) {
-
             Box(
                 modifier = Modifier
                     .size(44.dp)
@@ -367,7 +357,6 @@ fun ActionCard(
                     .background(ServexaLightPurple),
                 contentAlignment = Alignment.Center
             ) {
-
                 Icon(
                     imageVector = icon,
                     contentDescription = title,
@@ -375,9 +364,7 @@ fun ActionCard(
                 )
             }
 
-            Spacer(
-                modifier = Modifier.height(12.dp)
-            )
+            Spacer(modifier = Modifier.height(12.dp))
 
             Text(
                 text = title,
@@ -389,16 +376,15 @@ fun ActionCard(
     }
 }
 
-
 // ======================================================
-// RECENT JOBS
+// RECENT JOBS - REAL FIRESTORE DATA
 // ======================================================
 
 @Composable
-fun RecentJobs() {
-
+fun RecentJobs(
+    jobs: List<Job>
+) {
     Column {
-
         Text(
             text = "Recent Jobs",
             fontSize = 20.sp,
@@ -406,28 +392,57 @@ fun RecentJobs() {
             color = ServexaDarkBlue
         )
 
-        Spacer(
-            modifier = Modifier.height(12.dp)
-        )
+        Spacer(modifier = Modifier.height(12.dp))
 
-        JobItem(
-            title = "AC Repair",
-            customer = "Rajesh Kumar",
-            status = "PENDING"
-        )
+        if (jobs.isEmpty()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(22.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Build,
+                        contentDescription = null,
+                        tint = ServexaPurple,
+                        modifier = Modifier.size(30.dp)
+                    )
 
-        Spacer(
-            modifier = Modifier.height(10.dp)
-        )
+                    Spacer(modifier = Modifier.height(8.dp))
 
-        JobItem(
-            title = "Fan Installation",
-            customer = "Amit Sharma",
-            status = "COMPLETED"
-        )
+                    Text(
+                        text = "No jobs available yet",
+                        fontWeight = FontWeight.SemiBold,
+                        color = ServexaDarkBlue
+                    )
+
+                    Text(
+                        text = "Your assigned jobs will appear here.",
+                        fontSize = 13.sp,
+                        color = Color.Gray
+                    )
+                }
+            }
+        } else {
+            jobs.take(3).forEach { job ->
+                JobItem(
+                    title = job.title,
+                    customer = job.customerName,
+                    status = job.status.uppercase()
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+        }
     }
 }
-
 
 // ======================================================
 // JOB ITEM
@@ -439,19 +454,19 @@ fun JobItem(
     customer: String,
     status: String
 ) {
-
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp)
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        )
     ) {
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Box(
                 modifier = Modifier
                     .size(44.dp)
@@ -459,7 +474,6 @@ fun JobItem(
                     .background(ServexaLightPurple),
                 contentAlignment = Alignment.Center
             ) {
-
                 Icon(
                     imageVector = Icons.Default.Build,
                     contentDescription = "Job",
@@ -467,26 +481,21 @@ fun JobItem(
                 )
             }
 
-            Spacer(
-                modifier = Modifier.width(14.dp)
-            )
+            Spacer(modifier = Modifier.width(14.dp))
 
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-
                 Text(
                     text = title,
                     fontWeight = FontWeight.Bold,
                     color = ServexaDarkBlue
                 )
 
-                Spacer(
-                    modifier = Modifier.height(3.dp)
-                )
+                Spacer(modifier = Modifier.height(3.dp))
 
                 Text(
-                    text = customer,
+                    text = customer.ifBlank { "Customer" },
                     fontSize = 13.sp,
                     color = Color(0xFF7A8195)
                 )
@@ -496,16 +505,16 @@ fun JobItem(
                 text = status,
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (status == "PENDING") {
-                    ServexaOrange
-                } else {
-                    Color(0xFF35A66F)
+                color = when (status) {
+                    "PENDING" -> ServexaOrange
+                    "COMPLETED" -> Color(0xFF35A66F)
+                    "ACCEPTED" -> ServexaBlue
+                    else -> Color(0xFF7A8195)
                 }
             )
         }
     }
 }
-
 
 // ======================================================
 // BOTTOM BAR
@@ -515,9 +524,9 @@ fun JobItem(
 fun DashboardBottomBar(
     onProfileClick: () -> Unit,
     onHomeClick: () -> Unit,
-    onJobsClick: () -> Unit
+    onJobsClick: () -> Unit,
+    onMessageClick: () -> Unit
 ) {
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -529,7 +538,6 @@ fun DashboardBottomBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-
         BottomItem(
             icon = Icons.Default.Home,
             label = "Home",
@@ -545,6 +553,13 @@ fun DashboardBottomBar(
         )
 
         BottomItem(
+            icon = Icons.Default.Email,
+            label = "Message",
+            selected = false,
+            onClick = onMessageClick
+        )
+
+        BottomItem(
             icon = Icons.Default.Person,
             label = "Profile",
             selected = false,
@@ -553,114 +568,72 @@ fun DashboardBottomBar(
     }
 }
 
-
 // ======================================================
 // BOTTOM ITEM
 // ======================================================
 
 @Composable
 fun BottomItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     label: String,
     selected: Boolean,
     onClick: () -> Unit
 ) {
-
     Column(
-        modifier = Modifier.clickable {
-            onClick()
-        },
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier
+            .clip(
+                RoundedCornerShape(10.dp)
+            )
+            .clickable {
+                onClick()
+            }
+            .padding(
+                horizontal = 12.dp,
+                vertical = 5.dp
+            ),
 
+        horizontalAlignment =
+            Alignment.CenterHorizontally
     ) {
 
         Icon(
             imageVector = icon,
             contentDescription = label,
-            tint = if (selected) {
-                ServexaBlue
-            } else {
-                Color(0xFF8C93A8)
-            },
-            modifier = Modifier.size(24.dp)
 
+            tint =
+                if (selected) {
+                    ServexaPurple
+                } else {
+                    ServexaSecondaryText
+                },
+
+            modifier = Modifier.size(20.dp)
         )
+
 
         Spacer(
-            modifier = Modifier.height(4.dp)
+            modifier = Modifier.height(3.dp)
         )
+
 
         Text(
             text = label,
-            fontSize = 11.sp,
-            fontWeight = if (selected) {
-                FontWeight.Bold
-            } else {
-                FontWeight.Normal
-            },
-            color = if (selected) {
-                ServexaBlue
-            } else {
-                Color(0xFF8C93A8)
-            }
+
+            fontSize = 10.sp,
+
+            fontWeight =
+                if (selected) {
+                    FontWeight.Bold
+                } else {
+                    FontWeight.Medium
+                },
+
+            color =
+                if (selected) {
+                    ServexaPurple
+                } else {
+                    ServexaSecondaryText
+                }
         )
     }
 }
-
-
-//// ======================================================
-//// PREVIEW
-//// ======================================================
-//
-//@Preview(
-//    showBackground = true,
-//    showSystemUi = true
-//)
-//@Composable
-//fun DashboardScreenPreview() {
-//
-//    Column(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .background(ServexaBackground)
-//    ) {
-//
-//        DashboardHeader(
-//            userName = "Adarsha"
-//        )
-//
-//        LazyColumn(
-//            modifier = Modifier
-//                .weight(1f)
-//                .padding(horizontal = 22.dp),
-//            verticalArrangement = Arrangement.spacedBy(20.dp)
-//        ) {
-//
-//            item {
-//
-//                Spacer(
-//                    modifier = Modifier.height(4.dp)
-//                )
-//
-//                OverviewCard()
-//            }
-//
-//            item {
-//                QuickActions()
-//            }
-//
-//            item {
-//                RecentJobs()
-//            }
-//
-//            item {
-//
-//                Spacer(
-//                    modifier = Modifier.height(10.dp)
-//                )
-//            }
-//        }
-//
-//        DashboardBottomBar()
-//    }
-//}

@@ -1,8 +1,9 @@
+
 package com.example.servexa.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -19,18 +22,23 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,23 +48,34 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.servexa.viewModel.UserViewModel
-import com.google.firebase.firestore.remote.WatchChange
 
-private val ServexaBlue = Color(0xFF315FEA)
-private val ServexaDarkBlue = Color(0xFF18264A)
-private val ServexaPurple = Color(0xFF7657F5)
-private val ServexaLightPurple = Color(0xFFE9E7FF)
-private val ServexaBackground = Color(0xFFF8F9FF)
+// ========================================================
+// COLORS
+// ========================================================
 
+private val ServexaPurple = Color(0xFF5B4AEF)
+private val ServexaPurpleSoft = Color(0xFFF1EFFF)
+
+private val ServexaBackground = Color(0xFFFFFFFF)
+private val ServexaText = Color(0xFF18181B)
+private val ServexaSecondaryText = Color(0xFF71717A)
+private val ServexaMutedText = Color(0xFFA1A1AA)
+private val ServexaDivider = Color(0xFFE4E4E7)
+
+private val ServexaGreen = Color(0xFF16A34A)
+private val ServexaGreenSoft = Color(0xFFDCFCE7)
+
+// ========================================================
+// PROFILE SCREEN
+// ========================================================
 
 @Composable
 fun ProfileScreen(
@@ -64,28 +83,33 @@ fun ProfileScreen(
     onHomeClick: () -> Unit,
     onJobsClick: () -> Unit,
     onProfileClick: () -> Unit,
+    onSwitchAccountClick: (String) -> Unit
 ) {
-
-
     val user by viewModel.user.collectAsStateWithLifecycle()
+    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
+
+    var isEditing by remember { mutableStateOf(false) }
+    var editedName by remember { mutableStateOf("") }
+    var editedServices by remember { mutableStateOf<List<String>>(emptyList()) }
+    var isSwitchingAccount by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         viewModel.getCurrentUser()
     }
-    var isEditing by remember { mutableStateOf(false) }
-    var editedName by remember { mutableStateOf("") }
-    var editedRole by remember { mutableStateOf("") }
-    var editedServices by remember {
-        mutableStateOf<List<String>>(emptyList())
-    }
-
-
 
     LaunchedEffect(user) {
         if (user != null) {
             editedName = user!!.name
-            editedRole = user!!.currentRole
             editedServices = user!!.services
         }
+    }
+
+    val currentRole = user?.currentRole ?: "CUSTOMER"
+
+    val targetRole = if (currentRole == "SERVICE_PROVIDER") {
+        "CUSTOMER"
+    } else {
+        "SERVICE_PROVIDER"
     }
 
     Column(
@@ -93,75 +117,215 @@ fun ProfileScreen(
             .fillMaxSize()
             .background(ServexaBackground)
     ) {
+        ProfileTopHeader()
 
-        ProfileHeader(userName = user?.name ?: "User")
-
-        Column(modifier = Modifier
-            .weight(1f)
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 28.dp)
         ) {
+            Spacer(modifier = Modifier.height(32.dp))
 
-            Spacer(
-                modifier = Modifier.height(20.dp)
+            // PROFILE IDENTITY
+            ProfileIdentity(
+                name = user?.name?.ifBlank { "User" } ?: "User",
+                role = currentRole
             )
 
+            Spacer(modifier = Modifier.height(46.dp))
 
-            ProfileInformation(
-                userName = editedName,
-                userEmail = user?.email ?: "No email",
-                userRole = editedRole,
-                isEditing = isEditing,
-                onNameChange = {
-                    editedName = it
-                },
-                onRoleChange = {
-                    editedRole = it
-                }
-            )
+            // ACCOUNT DETAILS
+            ProfileSectionLabel(text = "ACCOUNT")
 
-            if (user?.services?.isNotEmpty() == true) {
+            Spacer(modifier = Modifier.height(14.dp))
 
-                Spacer(
-                    modifier = Modifier.height(20.dp)
+            if (isEditing) {
+                EditNameField(
+                    value = editedName,
+                    onValueChange = { editedName = it }
                 )
-
-                ProfileServices(
-                    services = editedServices,
-                    isEditing = isEditing,
-                    onServicesChange = {
-                        editedServices = it
-                    }
+            } else {
+                ProfileDetailRow(
+                    title = "Personal information",
+                    value = user?.name?.ifBlank { "Not provided" }
+                        ?: "Not provided",
+                    icon = Icons.Default.Person,
+                    showArrow = false
                 )
             }
 
-            Spacer(
-                modifier = Modifier.height(20.dp)
+            ProfileDivider()
+
+            ProfileDetailRow(
+                title = "Email address",
+                value = user?.email ?: "Not available",
+                icon = Icons.Default.Email,
+                showArrow = false
             )
 
-            EditProfileButton(
-                isEditing = isEditing,
-                onClick = {
+            ProfileDivider()
 
-                    if (isEditing) {
+            // The active account is displayed but cannot be edited here.
+            ProfileDetailRow(
+                title = "Active account",
+                value = roleDisplayName(currentRole),
+                icon = Icons.Default.Work,
+                showArrow = false
+            )
 
-                        viewModel.updateUser(
-                            name = editedName,
-                            currentRole = editedRole,
-                            roles = listOf(editedRole)
+            Spacer(modifier = Modifier.height(46.dp))
+
+            // SERVICES
+            ProfileSectionLabel(text = "YOUR SERVICES")
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            if (isEditing) {
+                EditableServices(
+                    selectedServices = editedServices,
+                    onServicesChange = { editedServices = it }
+                )
+            } else {
+                ServicesDisplay(services = user?.services.orEmpty())
+            }
+
+            Spacer(modifier = Modifier.height(42.dp))
+
+            // EDIT / SAVE PROFILE
+            if (isEditing) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    TextButton(
+                        onClick = {
+                            editedName = user?.name.orEmpty()
+                            editedServices = user?.services.orEmpty()
+                            isEditing = false
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = "Cancel",
+                            color = ServexaSecondaryText
                         )
-
-                        viewModel.updateServices(
-                            editedServices
-                        )
-
-                        isEditing = false
-
-                    } else {
-
-                        isEditing = true
                     }
-                })
+
+                    Button(
+                        onClick = {
+                            val name = editedName.trim()
+
+                            if (name.isNotBlank()) {
+                                val existingRoles = user?.role
+                                    ?.toMutableSet()
+                                    ?: mutableSetOf(currentRole)
+
+                                existingRoles.add(currentRole)
+
+                                viewModel.updateUser(
+                                    name = name,
+                                    currentRole = currentRole,
+                                    roles = existingRoles.toList()
+                                )
+
+                                viewModel.updateServices(editedServices)
+                                isEditing = false
+                            }
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = ServexaPurple
+                        )
+                    ) {
+                        Text(
+                            text = "Save changes",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            } else {
+                Button(
+                    onClick = { isEditing = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ServexaPurple
+                    )
+                ) {
+                    Text(
+                        text = "Edit profile",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // SWITCH ACCOUNT
+            ProfileSectionLabel(text = "SWITCH ACCOUNT")
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Text(
+                text = "Switch between your Customer and Service Provider accounts.",
+                fontSize = 13.sp,
+                color = ServexaSecondaryText
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Button(
+                onClick = {
+                    if (!isSwitchingAccount && user != null) {
+                        isSwitchingAccount = true
+
+                        viewModel.switchAccountRole(targetRole) {
+                            isSwitchingAccount = false
+                            onSwitchAccountClick(targetRole)
+                        }
+                    }
+                },
+                enabled = !isSwitchingAccount && user != null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = ServexaPurpleSoft,
+                    contentColor = ServexaPurple
+                )
+            ) {
+                Text(
+                    text = when {
+                        isSwitchingAccount -> "Switching account..."
+                        targetRole == "CUSTOMER" -> "Switch to Customer"
+                        else -> "Switch to Service Provider"
+                    },
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            if (!errorMessage.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    text = errorMessage.orEmpty(),
+                    fontSize = 13.sp,
+                    color = Color(0xFFDC2626)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
         }
 
         ProfileBottomBar(
@@ -172,225 +336,310 @@ fun ProfileScreen(
     }
 }
 
+// ========================================================
+// TOP HEADER
+// ========================================================
 
 @Composable
-fun ProfileHeader(userName: String) {
+private fun ProfileTopHeader() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 28.dp, vertical = 24.dp)
+    ) {
+        Text(
+            text = "SERVEXA",
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 2.sp,
+            color = ServexaPurple
+        )
 
+        Spacer(modifier = Modifier.height(6.dp))
+
+        Text(
+            text = "Profile",
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold,
+            color = ServexaText
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = "Manage your account and services",
+            fontSize = 14.sp,
+            color = ServexaSecondaryText
+        )
+    }
+}
+
+// ========================================================
+// PROFILE IDENTITY
+// ========================================================
+
+@Composable
+private fun ProfileIdentity(
+    name: String,
+    role: String
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(78.dp)
+                .background(ServexaPurpleSoft, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = name.firstOrNull()?.uppercase() ?: "U",
+                fontSize = 30.sp,
+                fontWeight = FontWeight.Bold,
+                color = ServexaPurple
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = name,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = ServexaText
+        )
+
+        Spacer(modifier = Modifier.height(5.dp))
+
+        Text(
+            text = roleDisplayName(role),
+            fontSize = 14.sp,
+            color = ServexaSecondaryText
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(50))
+                .background(ServexaGreenSoft)
+                .padding(horizontal = 10.dp, vertical = 5.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .background(ServexaGreen, CircleShape)
+            )
+
+            Spacer(modifier = Modifier.width(6.dp))
+
+            Text(
+                text = "Active",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = ServexaGreen
+            )
+        }
+    }
+}
+
+// ========================================================
+// SECTION LABEL
+// ========================================================
+
+@Composable
+private fun ProfileSectionLabel(text: String) {
+    Text(
+        text = text,
+        fontSize = 11.sp,
+        fontWeight = FontWeight.Bold,
+        letterSpacing = 1.2.sp,
+        color = ServexaMutedText
+    )
+}
+
+// ========================================================
+// DETAIL ROW
+// ========================================================
+
+@Composable
+private fun ProfileDetailRow(
+    title: String,
+    value: String,
+    icon: ImageVector,
+    showArrow: Boolean
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 17.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .background(
+                    ServexaPurpleSoft,
+                    RoundedCornerShape(9.dp)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = ServexaPurple,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(14.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                fontSize = 12.sp,
+                color = ServexaSecondaryText
+            )
+
+            Spacer(modifier = Modifier.height(3.dp))
+
+            Text(
+                text = value,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = ServexaText
+            )
+        }
+
+        if (showArrow) {
+            Icon(
+                imageVector = Icons.Default.ArrowForwardIos,
+                contentDescription = null,
+                tint = ServexaMutedText,
+                modifier = Modifier.size(14.dp)
+            )
+        }
+    }
+}
+
+// ========================================================
+// DIVIDER
+// ========================================================
+
+@Composable
+private fun ProfileDivider() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(
-                elevation = 10.dp,
-                shape = RoundedCornerShape(
-                    bottomStart = 30.dp,
-                    bottomEnd = 30.dp
-                )
-            )
-            .clip(
-                RoundedCornerShape(
-                    bottomStart = 30.dp,
-                    bottomEnd = 30.dp
-                )
-            )
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(
-                        ServexaBlue,
-                        ServexaPurple
-                    )
-                )
-            )
-            .padding(
-                top = 30.dp,
-                bottom = 30.dp
-            )
-    ) {
-
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
-            // Avatar
-            Box(
-                modifier = Modifier
-                    .size(90.dp)
-                    .clip(CircleShape)
-                    .background(Color.White),
-                contentAlignment = Alignment.Center
-            ) {
-
-                Text(
-                    text = userName.firstOrNull()?.uppercase() ?: "U",
-                    fontSize = 36.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = ServexaPurple
-                )
-            }
-
-            Spacer(
-                modifier = Modifier.height(14.dp)
-            )
-
-            Text(
-                text = userName,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color.White
-            )
-
-            Spacer(
-                modifier = Modifier.height(4.dp)
-            )
-
-            Text(
-                text = "Servexa User",
-                fontSize = 14.sp,
-                color = Color.White.copy(alpha = 0.75f)
-            )
-        }
-    }
+            .height(1.dp)
+            .background(ServexaDivider)
+    )
 }
 
+// ========================================================
+// EDIT NAME
+// ========================================================
 
 @Composable
-fun ProfileInformation(
-    userName: String,
-    userEmail: String,
-    userRole: String,
-    isEditing: Boolean,
-    onNameChange: (String) -> Unit,
-    onRoleChange: (String) -> Unit
+private fun EditNameField(
+    value: String,
+    onValueChange: (String) -> Unit
 ) {
-    var roleExpanded by remember {
-        mutableStateOf(false)
-    }
-
-    val roles = listOf(
-        "CUSTOMER",
-        "SERVICE_PROVIDER"
-    )
-
-    Card(
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp)
-    ) {
+        singleLine = true,
+        label = { Text("Full name") },
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = null
+            )
+        },
+        shape = RoundedCornerShape(10.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = ServexaPurple,
+            unfocusedBorderColor = ServexaDivider,
+            focusedLabelColor = ServexaPurple,
+            cursorColor = ServexaPurple
+        )
+    )
+}
+
+// ========================================================
+// SERVICES DISPLAY
+// ========================================================
+
+@Composable
+private fun ServicesDisplay(services: List<String>) {
+    if (services.isEmpty()) {
+        Text(
+            text = "No services added yet.",
+            fontSize = 14.sp,
+            color = ServexaSecondaryText
+        )
+    } else {
         Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-
-            Text(
-                text = "Profile Information",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            // NAME
-            if (isEditing) {
-
-                OutlinedTextField(
-                    value = userName,
-                    onValueChange = onNameChange,
-                    label = {
-                        Text("Full Name")
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-
-            } else {
-
-                ProfileInfoCard(
-                    icon = Icons.Default.Person,
-                    title = "Full Name",
-                    value = userName
-                )
-            }
-
-            // EMAIL
-            ProfileInfoCard(
-                icon = Icons.Default.Email,
-                title = "Email Address",
-                value = userEmail
-            )
-
-            // ROLE
-            if (isEditing) {
-
-                Box(
-                    modifier = Modifier.fillMaxWidth()
+            services.chunked(2).forEach { rowServices ->
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-
-                    OutlinedTextField(
-                        value = userRole,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = {
-                            Text("Account Type")
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        trailingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Build,
-                                contentDescription = "Select Role"
-                            )
-                        }
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .matchParentSize()
-                            .clickable {
-                                roleExpanded = true
-                            }
-                    )
-
-                    DropdownMenu(
-                        expanded = roleExpanded,
-                        onDismissRequest = {
-                            roleExpanded = false
-                        }
-                    ) {
-                        roles.forEach { role ->
-
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        if (role == "SERVICE_PROVIDER")
-                                            "Service Provider"
-                                        else
-                                            "Customer"
-                                    )
-                                },
-                                onClick = {
-                                    onRoleChange(role)
-                                    roleExpanded = false
-                                }
-                            )
-                        }
+                    rowServices.forEach { service ->
+                        ServiceTag(service = service)
                     }
                 }
-
-            } else {
-
-                ProfileInfoCard(
-                    icon = Icons.Default.Build,
-                    title = "Account Type",
-                    value = if (userRole == "SERVICE_PROVIDER")
-                        "Service Provider"
-                    else
-                        "Customer"
-                )
             }
         }
     }
 }
 
+// ========================================================
+// SERVICE TAG
+// ========================================================
+
 @Composable
-fun ProfileServices(
-    services: List<String>,
-    isEditing: Boolean,
+private fun ServiceTag(service: String) {
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .border(
+                width = 1.dp,
+                color = ServexaDivider,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(horizontal = 11.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.Build,
+            contentDescription = null,
+            tint = ServexaPurple,
+            modifier = Modifier.size(15.dp)
+        )
+
+        Spacer(modifier = Modifier.width(6.dp))
+
+        Text(
+            text = service,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = ServexaText
+        )
+    }
+}
+
+// ========================================================
+// EDITABLE SERVICES
+// ========================================================
+
+@Composable
+private fun EditableServices(
+    selectedServices: List<String>,
     onServicesChange: (List<String>) -> Unit
 ) {
     val availableServices = listOf(
@@ -402,236 +651,92 @@ fun ProfileServices(
         "Appliance Repair"
     )
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+    Column {
+        availableServices.forEach { service ->
+            val selected = selectedServices.contains(service)
 
-            Text(
-                text = "Services",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            if (isEditing) {
-
-                availableServices.forEach { service ->
-
-                    val isSelected = services.contains(service)
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-
-                                val updatedServices =
-                                    if (isSelected) {
-                                        services - service
-                                    } else {
-                                        services + service
-                                    }
-
-                                onServicesChange(updatedServices)
-                            },
-
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-
-                        androidx.compose.material3.Checkbox(
-                            checked = isSelected,
-
-                            onCheckedChange = {
-
-                                val updatedServices =
-                                    if (isSelected) {
-                                        services - service
-                                    } else {
-                                        services + service
-                                    }
-
-                                onServicesChange(updatedServices)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        onServicesChange(
+                            if (selected) {
+                                selectedServices - service
+                            } else {
+                                selectedServices + service
                             }
                         )
-
-                        Spacer(
-                            modifier = Modifier.width(8.dp)
-                        )
-
-                        Text(
-                            text = service,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        )
                     }
-                }
-
-            } else {
-
-                services.forEach { service ->
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-
-                        verticalAlignment =
-                            Alignment.CenterVertically
-                    ) {
-
-                        Icon(
-                            imageVector = Icons.Default.Build,
-                            contentDescription = null,
-                            tint = ServexaPurple,
-                            modifier = Modifier.size(22.dp)
-                        )
-
-                        Spacer(
-                            modifier = Modifier.width(12.dp)
-                        )
-
-                        Text(
-                            text = service,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ProfileInfoCard(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    value: String
-) {
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp)
-    ) {
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(18.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            Box(
-                modifier = Modifier
-                    .size(46.dp)
-                    .clip(CircleShape)
-                    .background(ServexaLightPurple),
-                contentAlignment = Alignment.Center
+                    .padding(vertical = 5.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-
-                Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    tint = ServexaPurple,
-                    modifier = Modifier.size(22.dp)
+                Checkbox(
+                    checked = selected,
+                    onCheckedChange = { checked ->
+                        onServicesChange(
+                            if (checked) {
+                                if (selected) selectedServices
+                                else selectedServices + service
+                            } else {
+                                selectedServices - service
+                            }
+                        )
+                    }
                 )
-            }
 
-            Spacer(
-                modifier = Modifier.width(14.dp)
-            )
-
-            Column {
+                Spacer(modifier = Modifier.width(6.dp))
 
                 Text(
-                    text = title,
-                    fontSize = 12.sp,
-                    color = Color(0xFF7A8195)
-                )
-
-                Spacer(
-                    modifier = Modifier.height(3.dp)
-                )
-
-                Text(
-                    text = value,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = ServexaDarkBlue
+                    text = service,
+                    fontSize = 14.sp,
+                    color = ServexaText
                 )
             }
         }
     }
 }
 
+// ========================================================
+// ROLE DISPLAY
+// ========================================================
 
-@Composable
-fun EditProfileButton(
-    isEditing: Boolean,
-    onClick: () -> Unit
-) {
-
-    Button(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-
-        Icon(
-            imageVector = Icons.Default.Edit,
-            contentDescription = if (isEditing) {
-                "Save profile"
-            } else {
-                "Edit profile"
-            }
-        )
-
-        Spacer(
-            modifier = Modifier.width(8.dp)
-        )
-
-        Text(
-            text = if (isEditing) {
-                "SAVE CHANGES"
-            } else {
-                "EDIT PROFILE"
-            },
-            fontWeight = FontWeight.Bold
-        )
+private fun roleDisplayName(role: String): String {
+    return when (role) {
+        "SERVICE_PROVIDER" -> "Service Provider"
+        "CUSTOMER" -> "Customer"
+        else -> role
     }
 }
 
+// ========================================================
+// BOTTOM NAVIGATION
+// ========================================================
 
 @Composable
-fun ProfileBottomBar(
+private fun ProfileBottomBar(
     onHomeClick: () -> Unit,
     onJobsClick: () -> Unit,
-    onProfileClick: () -> Unit,
+    onProfileClick: () -> Unit
 ) {
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
-            .padding(
-                horizontal = 24.dp,
-                vertical = 14.dp
-            ),
+            .border(width = 1.dp, color = ServexaDivider)
+            .navigationBarsPadding()
+            .padding(horizontal = 40.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-
         ProfileBottomItem(
             icon = Icons.Default.Home,
             label = "Home",
             selected = false,
             onClick = onHomeClick
-
         )
 
         ProfileBottomItem(
-            icon = Icons.Default.Build,
+            icon = Icons.Default.Work,
             label = "Jobs",
             selected = false,
             onClick = onJobsClick
@@ -646,53 +751,174 @@ fun ProfileBottomBar(
     }
 }
 
-
 @Composable
-fun ProfileBottomItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+private fun ProfileBottomItem(
+    icon: ImageVector,
     label: String,
     selected: Boolean,
     onClick: () -> Unit
 ) {
-
     Column(
-        modifier = Modifier.clickable {
-            onClick()
-        },
+        modifier = Modifier
+            .clip(RoundedCornerShape(10.dp))
+            .clickable { onClick() }
+            .padding(horizontal = 12.dp, vertical = 5.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Icon(
             imageVector = icon,
             contentDescription = label,
-            tint = if (selected) {
-                ServexaBlue
-            } else {
-                Color(0xFF8C93A8)
-            },
-            modifier = Modifier.size(24.dp)
+            tint = if (selected) ServexaPurple
+            else ServexaSecondaryText,
+            modifier = Modifier.size(20.dp)
         )
 
-        Spacer(
-            modifier = Modifier.height(4.dp)
-        )
+        Spacer(modifier = Modifier.height(3.dp))
 
         Text(
             text = label,
-            fontSize = 11.sp,
-            fontWeight = if (selected) {
-                FontWeight.Bold
-            } else {
-                FontWeight.Normal
-            },
-            color = if (selected) {
-                ServexaBlue
-            } else {
-                Color(0xFF8C93A8)
-            }
+            fontSize = 10.sp,
+            fontWeight = if (selected) FontWeight.Bold
+            else FontWeight.Medium,
+            color = if (selected) ServexaPurple
+            else ServexaSecondaryText
         )
     }
 }
 
+// ========================================================
+// PREVIEW
+// ========================================================
 
+@Preview(
+    showBackground = true,
+    showSystemUi = true,
+    device = "spec:width=411dp,height=891dp,dpi=420"
+)
+@Composable
+fun ProfileScreenPreview() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        ProfileTopHeader()
 
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 28.dp)
+        ) {
+            Spacer(modifier = Modifier.height(32.dp))
+
+            ProfileIdentity(
+                name = "Adarsh Ghosh",
+                role = "SERVICE_PROVIDER"
+            )
+
+            Spacer(modifier = Modifier.height(46.dp))
+
+            ProfileSectionLabel(text = "ACCOUNT")
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            ProfileDetailRow(
+                title = "Personal information",
+                value = "Adarsh Ghosh",
+                icon = Icons.Default.Person,
+                showArrow = false
+            )
+
+            ProfileDivider()
+
+            ProfileDetailRow(
+                title = "Email address",
+                value = "adarsh@example.com",
+                icon = Icons.Default.Email,
+                showArrow = false
+            )
+
+            ProfileDivider()
+
+            ProfileDetailRow(
+                title = "Active account",
+                value = "Service Provider",
+                icon = Icons.Default.Work,
+                showArrow = false
+            )
+
+            Spacer(modifier = Modifier.height(46.dp))
+
+            ProfileSectionLabel(text = "YOUR SERVICES")
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            ServicesDisplay(
+                services = listOf(
+                    "Electrician",
+                    "AC Technician",
+                    "Appliance Repair"
+                )
+            )
+
+            Spacer(modifier = Modifier.height(42.dp))
+
+            Button(
+                onClick = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = ServexaPurple
+                )
+            ) {
+                Text(
+                    text = "Edit profile",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            ProfileSectionLabel(text = "SWITCH ACCOUNT")
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Text(
+                text = "Switch between your Customer and Service Provider accounts.",
+                fontSize = 13.sp,
+                color = ServexaSecondaryText
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Button(
+                onClick = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = ServexaPurpleSoft,
+                    contentColor = ServexaPurple
+                )
+            ) {
+                Text(
+                    text = "Switch to Customer",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
+        ProfileBottomBar(
+            onHomeClick = {},
+            onJobsClick = {},
+            onProfileClick = {}
+        )
+    }
+}

@@ -1,5 +1,6 @@
 package com.example.servexa.navigation
 
+import android.net.Uri
 
 
 sealed class Screen(val route: String) {
@@ -22,5 +23,17 @@ sealed class Screen(val route: String) {
             return "post_job/$service"
         }
     }
+
     data object CustomerRequests : Screen("customer_requests")
+
+    data object Conversations : Screen("conversations")
+    data object Chat : Screen("chat/{conversationId}/{otherUserId}/{otherUserName}") {
+        fun createRoute(
+            conversationId: String,
+            otherUserId: String,
+            otherUserName: String
+        ): String {
+            return "chat/$conversationId/$otherUserId/${Uri.encode(otherUserName)}"
+        }
+    }
 }

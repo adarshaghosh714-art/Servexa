@@ -1,0 +1,45 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Rules for Users collection
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
+    }
+
+    // Rules for Jobs collection
+    match /jobs/{jobId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAuthenticated();
+    }
+
+    // Rules for Conversations collection
+    match /conversations/{conversationId} {
+      // Allow read/get/list if user is in participantIds array
+      allow read: if isAuthenticated() && request.auth.uid in resource.data.participantIds;
+
+      // Allow create if user is authenticated and listed as a participant
+      allow create: if isAuthenticated() && request.auth.uid in request.resource.data.participantIds;
+
+      // Allow update if user is a participant
+      allow update: if isAuthenticated() && request.auth.uid in resource.data.participantIds;
+
+      // Rules for Messages subcollection inside a conversation
+      match /messages/{messageId} {
+        allow read, create: if isAuthenticated() &&
+          request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds;
+      }
+    }
+  }
+}

@@ -67,4 +67,34 @@ class UserViewModel(
             }
         }
     }
+
+
+    fun switchAccountRole(
+        newRole: String,
+        onSuccess: () -> Unit
+    ) {
+        viewModelScope.launch {
+            _errorMessage.value = null
+
+            val result = repository.switchAccountRole(newRole)
+
+            result.onSuccess {
+                val updatedUser = repository.getCurrentUser()
+                _user.value = updatedUser
+
+                if (updatedUser?.currentRole == newRole) {
+                    onSuccess()
+                } else {
+                    _errorMessage.value =
+                        "Account switched, but refreshing your profile failed."
+                }
+            }
+
+            result.onFailure { exception ->
+                _errorMessage.value =
+                    exception.message ?: "Failed to switch account"
+            }
+        }
+    }
+
 }
